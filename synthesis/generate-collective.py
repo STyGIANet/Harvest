@@ -1,5 +1,6 @@
 import json
 import sys
+from dataclasses import dataclass
 from typing import List, Tuple
 from collectives import (
     reduceScatterRecursiveDoubling,
@@ -22,6 +23,13 @@ from collectives import (
     PatternStep,
     _parseDims,
 )
+
+Pair = Tuple[int, int, int]
+@dataclass(frozen=True)
+class PatternStepPost:
+    id: int
+    chunksize: int
+    demand: List[Pair]
 
 def _parseBruck(spec: str) -> Tuple[int, int]:
     # quick and dirty parsing here. May be there is a better way
@@ -127,17 +135,21 @@ def main():
 
 
         # In case there are multiple ports send to the same destination, then merge then into single entry (add the size)
-        coll: List(PatternStep) = []
+        coll: List(PatternStepPost) = []
         for s in steps:
             i = s.id
+            chunksize = s.chunksize
             demand: List[Pair] = []
             for (u, v, c) in s.demand:
                 if (u,v,c) in demand:
                     demand[demand.index((u,v,c))]=(u,v,demand[demand.index((u,v,c))][2]+c)
                 else:
                     demand.append((u,v,c))
-            coll.append(PatternStep(id=i, demand=demand))
+            coll.append(PatternStepPost(id=i, chunksize=chunksize, demand=demand))
 
+        # Note: The above loop merges multiple chunks to the same receiver.
+        # chunksize in each step indicates the actual chunksize.
+        # Entries in each step have a demand that can be a multiple of the chunksize, indicating multiple chunks to the same receiver
         doc = {
             "schema": "collective_pattern/v1",
             "collective": collective,
@@ -146,7 +158,7 @@ def main():
             "ports": ports,
             "units": "bytes",
             "steps": [
-                {"id": s.id, "demand": [[u, v, c] for (u, v, c) in s.demand]}
+                {"id": s.id, "chunksize":s.chunksize, "demand": [[u, v, c] for (u, v, c) in s.demand]}
                 for s in coll
             ],
         }

@@ -19,6 +19,8 @@ class DPScheduler:
         delta: float,
         alpha_r: float,
         dims: List[int],
+        chunksizes: List[int],
+        relaxation: int,
         logging: int,
     ):
         self.steps = steps
@@ -31,6 +33,8 @@ class DPScheduler:
         self.delta = delta
         self.alpha_r = alpha_r
         self.dims = dims
+        self.chunksizes = chunksizes
+        self.relaxation = relaxation
         self.logging = logging
         self._cache: Dict[Tuple[int, int], Tuple[Topology, float]] = {}
 
@@ -53,7 +57,10 @@ class DPScheduler:
             for v in range(self.n):
                 if u != v:
                     # number of edges between u,v. This can also be interpreted as the capacity between u,v
-                    x[u, v] = model.addVar(vtype=GRB.INTEGER, lb=0)
+                    if self.relaxation == 1:
+                        x[u, v] = model.addVar(vtype=GRB.CONTINUOUS, lb=0)
+                    else:
+                        x[u, v] = model.addVar(vtype=GRB.INTEGER, lb=0)
 
         theta = {}
         T = {}
@@ -64,7 +71,7 @@ class DPScheduler:
             # Lets give an epsilon for the lb, so that the inverse doesn't go to infinity
             theta[i] = model.addVar(lb=1e-6, ub=1)
             # auxiliary variable corresponding to the inverse of theta
-            T[i] = model.addVar(lb=1e-6)
+            T[i] = model.addVar(lb=0,ub=20*1e6) # setting a max 20 milliseconds limit for the transmission delay
             for (s, t, _) in self.steps[i - 1]:
                 # print("adding flow var for step", i-1)
                 for u in range(self.n):
@@ -82,14 +89,14 @@ class DPScheduler:
 
         # Flow conservation and demand constraints
         for i in range(a, b + 1): # For each step between a, b (including)
-            for (s, t, _) in self.steps[i - 1]: # Note: Algorithm's steps are indexed from 1
+            for (s, t, demand) in self.steps[i - 1]: # Note: Algorithm's steps are indexed from 1
                 for u in range(self.n):
                     outflow = gp.quicksum(f[i, s, t, u, v] for v in range(self.n) if u != v)
                     inflow = gp.quicksum(f[i, s, t, v, u] for v in range(self.n) if u != v)
                     if u == s:
-                        model.addConstr(outflow - inflow >= theta[i])
+                        model.addConstr(outflow - inflow == theta[i]*int(demand/self.chunksizes[i-1]))
                     elif u == t:
-                        model.addConstr(outflow - inflow <= -theta[i])
+                        model.addConstr(outflow - inflow == -theta[i]*int(demand/self.chunksizes[i-1]))
                     else:
                         model.addConstr(outflow - inflow == 0)
 
@@ -106,10 +113,10 @@ class DPScheduler:
         for i in range(a, b + 1):
             # We assume that m_i is same across all nodes within a single step,
             # even in multi-port case i.e., same size sent on all ports
-            _, _, _bits =  self.steps[i - 1][0]
-            model.addQConstr(theta[i] * T[i] >= self.beta * _bits)
+            _bits = self.chunksizes[i-1]
+            model.addQConstr(theta[i] * T[i] == self.beta * _bits)
 
-        model.setObjective(gp.quicksum(self.alpha*(b-a+1)+T[i]*(1+ self.delta/(self.beta * _bits)) for i in range(a, b + 1)), GRB.MINIMIZE)
+        model.setObjective(gp.quicksum(self.alpha*(b-a+1)+T[i]*(1+ self.delta/(self.beta * self.chunksizes[i-1])) for i in range(a, b + 1)), GRB.MINIMIZE)
         model.optimize()
 
         if model.Status != GRB.OPTIMAL:
@@ -123,8 +130,10 @@ class DPScheduler:
         topo: Topology = {}
         for (u, v), var in x.items():
             val = var.X
-            if val > 0.5:
-                topo[(u, v)] = int(round(val))
+            if val - math.floor(val) > 0.5:
+                topo[(u, v)] = int(math.ceil(val))
+            elif val>=1:
+                topo[(u,v)] = int(math.floor(val))
 
         cost = model.ObjVal
         self._cache[key] = (topo, cost)

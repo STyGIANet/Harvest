@@ -64,7 +64,7 @@ python3 generate-collective.py 27 81 bruckallgather-r3-p3 out.json
 To generate a topology, we need a collective given as input in json format, the in-out degree for each node, link capacity (in Gbps), alpha_r (in nanoseconds), and path to output file.
 
 ```
-python generate-schedule.py collective.json degree capacity alpha delta alpha_r logging out.json
+python generate-schedule.py collective.json degree capacity alpha delta alpha_r relaxation logging out.json
 ```
 
 - `degree`: number of incoming and outgoing edges
@@ -72,4 +72,5 @@ python generate-schedule.py collective.json degree capacity alpha delta alpha_r 
 - `alpha`: setup latency (nanoseconds)
 - `delta`: propagation delay (nanoseconds)
 - `alpha_r`: reconfiguration delay (nanoseconds)
+- `relaxation`: Relaxes the edge variables to fractional, otherwise considered as integer variables
 - `logging`: whether to log output from gurobi

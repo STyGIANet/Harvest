@@ -9,6 +9,7 @@ Pair = Tuple[int, int, int]
 @dataclass(frozen=True)
 class PatternStep:
     id: int
+    chunksize: int 
     demand: List[Pair]
 
 def _parseDims(spec: str) -> List[int]:
@@ -42,7 +43,7 @@ def reduceScatterRecursiveDoubling(
         for u in range(n):
             v = (u + offset) % n
             demand.append((u, v, chunk))
-        steps.append(PatternStep(id=i, demand=demand))
+        steps.append(PatternStep(id=i, chunksize=chunk, demand=demand))
 
     return steps
 
@@ -69,7 +70,7 @@ def allGatherRecursiveDoubling(
         for u in range(n):
             v = (u + offset) % n
             demand.append((u, v, chunk))
-        steps.append(PatternStep(id=i, demand=demand))
+        steps.append(PatternStep(id=i, chunksize=chunk, demand=demand))
 
     return steps
 
@@ -85,11 +86,11 @@ def allReduceRecursiveDoubling(
     sid = 1
 
     for st in rs:
-        steps.append(PatternStep(id=sid, demand=st.demand))
+        steps.append(PatternStep(id=sid, chunksize=st.chunksize, demand=st.demand))
         sid += 1
 
     for st in ag:
-        steps.append(PatternStep(id=sid, demand=st.demand))
+        steps.append(PatternStep(id=sid, chunksize=st.chunksize, demand=st.demand))
         sid += 1
 
     return steps
@@ -173,7 +174,7 @@ def reduceScatterRecursiveDoublingND(
                 c[dim] = _mod(c[dim] + off, dims[dim])
                 v = _idFromCoord(c, dims)
                 demand.append((u, v, chunk))
-        steps.append(PatternStep(id=t, demand=demand))
+        steps.append(PatternStep(id=t, chunksize=chunk, demand=demand))
     return steps
 
 def allGatherRecursiveDoublingND(
@@ -225,7 +226,7 @@ def allGatherRecursiveDoublingND(
                 c[dim] = _mod(c[dim] + off, dims[dim])
                 v = _idFromCoord(c, dims)
                 demand.append((u, v, chunk))
-        steps.append(PatternStep(id=i, demand=demand))
+        steps.append(PatternStep(id=i, chunksize=chunk, demand=demand))
     return steps
 
 def allReduceRecursiveDoublingND(
@@ -238,10 +239,10 @@ def allReduceRecursiveDoublingND(
     steps: List[PatternStep] = []
     sid = 1
     for st in rs:
-        steps.append(PatternStep(id=sid, demand=st.demand))
+        steps.append(PatternStep(id=sid, chunksize=st.chunksize, demand=st.demand))
         sid += 1
     for st in ag:
-        steps.append(PatternStep(id=sid, demand=st.demand))
+        steps.append(PatternStep(id=sid, chunksize=st.chunksize, demand=st.demand))
         sid += 1
     return steps
 
@@ -280,7 +281,7 @@ def reduceScatterSwing1D(
                 dist *= -1
             v = _mod(u + dist, n)
             demand.append((u, v, chunk))
-        steps.append(PatternStep(id=i, demand=demand))
+        steps.append(PatternStep(id=i, chunksize=chunk, demand=demand))
     return steps
 
 def allGatherSwing1D(
@@ -307,7 +308,7 @@ def allGatherSwing1D(
                 dist *= -1
             v = _mod(u + dist, n)
             demand.append((u, v, chunk))
-        steps.append(PatternStep(id=i, demand=demand))
+        steps.append(PatternStep(id=i, chunksize=chunk, demand=demand))
     return steps
 
 def allReduceSwing1D(
@@ -320,10 +321,10 @@ def allReduceSwing1D(
     steps: List[PatternStep] = []
     sid = 1
     for st in rs:
-        steps.append(PatternStep(id=sid, demand=st.demand))
+        steps.append(PatternStep(id=sid, chunksize=st.chunksize, demand=st.demand))
         sid += 1
     for st in ag:
-        steps.append(PatternStep(id=sid, demand=st.demand))
+        steps.append(PatternStep(id=sid, chunksize=st.chunksize, demand=st.demand))
         sid += 1
     return steps
 
@@ -467,6 +468,8 @@ def reduceScatterSwingMultiportND(
     steps: List[PatternStep] = []
     for t in range(S):
         demand: List[Pair] = []
+        # assume same chunksize on all ports
+        chunksize = 0
         for p in range(ports):
             peers = peersPorts[p]
             bm = bitmapsPorts[p]
@@ -476,7 +479,8 @@ def reduceScatterSwingMultiportND(
                 bytesSent = numBlocks * (mPerPort // n)
                 if bytesSent:
                     demand.append((u, v, bytesSent))
-        steps.append(PatternStep(id=t + 1, demand=demand))
+                    chunksize=bytesSent
+        steps.append(PatternStep(id=t + 1, chunksize=chunksize, demand=demand))
     return steps
 
 def allGatherSwingMultiportND(
@@ -518,6 +522,8 @@ def allGatherSwingMultiportND(
     for t in range(S):
         demand: List[Pair] = []
         idx = S - t - 1
+        # assume same chunksize on all ports
+        chunksize = 0
         for p in range(ports):
             peers = peersPorts[p]
             bm = bitmapsPorts[p]
@@ -527,7 +533,8 @@ def allGatherSwingMultiportND(
                 bytesSent = numBlocks * (mPerPort // n)
                 if bytesSent:
                     demand.append((u, v, bytesSent))
-        steps.append(PatternStep(id=t + 1, demand=demand))
+                    chunksize=bytesSent
+        steps.append(PatternStep(id=t + 1, chunksize=chunksize, demand=demand))
     return steps
 
 def allReduceSwingMultiportND(
@@ -540,10 +547,10 @@ def allReduceSwingMultiportND(
     steps: List[PatternStep] = []
     sid = 1
     for st in rs:
-        steps.append(PatternStep(id=sid, demand=st.demand))
+        steps.append(PatternStep(id=sid, chunksize=st.chunksize, demand=st.demand))
         sid += 1
     for st in ag:
-        steps.append(PatternStep(id=sid, demand=st.demand))
+        steps.append(PatternStep(id=sid, chunksize=st.chunksize, demand=st.demand))
         sid += 1
     return steps
 
@@ -568,7 +575,7 @@ def allToAll(
         for u in range(n):
             v = (u + i) % n
             demand.append((u, v, chunk))
-        steps.append(PatternStep(id=i, demand=demand))
+        steps.append(PatternStep(id=i, chunksize=chunk, demand=demand))
 
     return steps
 
@@ -603,7 +610,7 @@ def binomialTreeBroadcast(
                     v = (rv + root) % n
                     demand.append((u, v, m))
 
-        steps.append(PatternStep(id=k + 1, demand=demand))
+        steps.append(PatternStep(id=k + 1, chunksize=m, demand=demand))
 
     return steps
 
@@ -642,7 +649,7 @@ def binaryTreeBroadcast(
                 demand.append((u, v, m))
 
         if demand:
-            steps.append(PatternStep(id=k + 1, demand=demand))
+            steps.append(PatternStep(id=k + 1, chunksize=m, demand=demand))
 
     return steps
 
@@ -690,7 +697,7 @@ def bruckAllToAll(
                 for zz in zs:
                     v = (u + zz * base) % n
                     demand.append((u, v, bytes_per_step))
-            steps.append(PatternStep(id=sid, demand=demand))
+            steps.append(PatternStep(id=sid, chunksize=bytes_per_step, demand=demand))
             sid += 1
             z += ports
 
@@ -739,7 +746,7 @@ def bruckConcatenation(
                 for zz in zs:
                     v = (u + zz * base) % n
                     demand.append((u, v, payload))
-            steps.append(PatternStep(id=sid, demand=demand))
+            steps.append(PatternStep(id=sid, chunksize=payload, demand=demand))
             sid += 1
             z += ports
 

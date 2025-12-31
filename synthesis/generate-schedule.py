@@ -3,7 +3,7 @@ import sys
 from synthesis import DPScheduler
 
 def main():
-    if len(sys.argv) != 9:
+    if len(sys.argv) != 10:
         raise SystemExit(
             "usage: python generate-schedule.py collective.json d c alpha_r out.json"
         )
@@ -16,7 +16,8 @@ def main():
     delta = float(sys.argv[5]) # propagation delay (nanoseconds)
     alpha_r = float(sys.argv[6]) # reconfiguration delay (nanoseconds)
     logging = int(sys.argv[7])
-    out_file = sys.argv[8]
+    relaxation = int(sys.argv[8])
+    out_file = sys.argv[9]
 
     with open(in_file) as f:
         doc = json.load(f)
@@ -26,6 +27,7 @@ def main():
     print(dims)
     # Note: Size is converted to bits here
     steps = [[(u, v, m * 8) for (u, v, m) in s["demand"]] for s in doc["steps"]]
+    chunksizes = [s["chunksize"] for s in doc["steps"]]
 
     scheduler = DPScheduler(
         steps=steps,
@@ -37,6 +39,8 @@ def main():
         delta=delta,
         alpha_r=alpha_r,
         dims = dims,
+        chunksizes=chunksizes,
+        relaxation=relaxation,
         logging = logging,
     )
 
