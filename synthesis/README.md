@@ -35,8 +35,8 @@ Our repository currently supports the following collectives:
 	- all-reduce-rd
 - Swing
 	- reduce-scatter-swing
-	- all-gather-rd
-	- all-reduce-rd
+	- all-gather-swing
+	- all-reduce-swing
 - Naive All-to-all
 	- all-to-all
 - Binomial tree broadcast
