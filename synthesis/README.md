@@ -18,7 +18,7 @@ uv pip install --upgrade pip
 uv pip install -r requirements.txt
 ```
 
-# Example runs
+# Generate collectives
 
 The general format is as follows:
 
@@ -57,4 +57,12 @@ python3 generate-collective.py 4x4 1024 4 reduce-scatter-rd-nd out.json
 For Bruck's algorithm, we use a special format to indicate the `r` and `p` parameters within the name.
 ```
 python3 generate-collective.py 27 81 bruckallgather-r3-p3 out.json
+```
+
+# Generate Topology Schedules
+
+To generate a topology, we need a collective given as input in json format, the in-out degree for each node, link capacity (in Gbps), alpha_r (in nanoseconds), and path to output file.
+
+```
+python generate-schedule.py collective.json degree capacity alpha_r out.json
 ```

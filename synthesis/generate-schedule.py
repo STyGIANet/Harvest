@@ -3,23 +3,24 @@ import sys
 from synthesis import DPScheduler
 
 def main():
-    if len(sys.argv) != 7:
+    if len(sys.argv) != 6:
         raise SystemExit(
-            "usage: python generate-schedule.py collective.json d c beta alpha_r out.json"
+            "usage: python generate-schedule.py collective.json d c alpha_r out.json"
         )
 
     in_file = sys.argv[1]
     d = int(sys.argv[2])
-    c = float(sys.argv[3])
-    beta = float(sys.argv[4])
-    alpha_r = float(sys.argv[5])
-    out_file = sys.argv[6]
+    c = float(sys.argv[3])*1e9 # c in the command line arguments must be specified as Gbps
+    beta = 1/c
+    alpha_r = float(sys.argv[4])*1e-9
+    out_file = sys.argv[5]
 
     with open(in_file) as f:
         doc = json.load(f)
 
     n = doc["n"]
-    steps = [[tuple(x) for x in s["demand"]] for s in doc["steps"]]
+    # Note: Size is converted to bits here
+    steps = [[(u, v, c * 8) for (u, v, c) in s["demand"]] for s in doc["steps"]]
 
     scheduler = DPScheduler(
         steps=steps,
