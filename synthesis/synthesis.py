@@ -33,6 +33,8 @@ class DPScheduler:
 
         model = gp.Model()
         model.Params.OutputFlag = 0
+        model.Params.MIPFocus = 1
+        model.Params.Heuristics = 0.5
 
         x = {}
         for u in range(self.n):
