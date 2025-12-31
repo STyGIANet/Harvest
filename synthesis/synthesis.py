@@ -71,11 +71,14 @@ class DPScheduler:
         # flow variable for ith step, for demand s,t, traversing edge u,v
         flow_index = []
         for i in range(a, b + 1):
+            if self.logging:
+                print("adding flow indices", i)
             for (s, t, _) in self.steps[i - 1]:
                 for u in range(self.n):
                     for v in range(self.n):
                         if u != v:
                             flow_index.append((i, s, t, u, v))
+
         if self.logging:
             print("adding flow vars")
         f = model.addVars(flow_index,lb=0,ub=self.d,name="f")

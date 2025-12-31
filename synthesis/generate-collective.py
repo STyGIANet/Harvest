@@ -20,7 +20,6 @@ from collectives import (
     binaryTreeBroadcast,
     bruckAllToAll,
     bruckConcatenation,
-    PatternStep,
     _parseDims,
 )
 
@@ -139,13 +138,14 @@ def main():
         for s in steps:
             i = s.id
             chunksize = s.chunksize
-            demand: List[Pair] = []
+            demand: Dict[Tuple[int,int], int] = {}
             for (u, v, c) in s.demand:
-                if (u,v,c) in demand:
-                    demand[demand.index((u,v,c))]=(u,v,demand[demand.index((u,v,c))][2]+c)
+                if (u,v) in demand:
+                    demand[(u,v)] += c
                 else:
-                    demand.append((u,v,c))
-            coll.append(PatternStepPost(id=i, chunksize=chunksize, demand=demand))
+                    demand[(u,v)] = c
+            demandList = [(u, v, c) for (u, v), c in demand.items()]
+            coll.append(PatternStepPost(id=i, chunksize=chunksize, demand=demandList))
 
         # Note: The above loop merges multiple chunks to the same receiver.
         # chunksize in each step indicates the actual chunksize.
