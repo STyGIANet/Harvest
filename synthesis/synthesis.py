@@ -62,23 +62,23 @@ class DPScheduler:
                     else:
                         x[u, v] = model.addVar(vtype=GRB.INTEGER, lb=0)
 
-        theta = {}
-        T = {}
-        f = {}
-
+        I = list(range(a, b + 1))
+        # Concurrent flow theta variable
+        # Lets give an epsilon for the lb, so that the inverse doesn't go to infinity
+        theta = model.addVars(I,lb=1e-6,ub=1,name="theta")
+        # auxiliary variable corresponding to the transmission time
+        T = model.addVars(I,lb=0,ub=20e6,name="T") # Limiting to 20 milliseconds for the transmission delay
+        # flow variable for ith step, for demand s,t, traversing edge u,v
+        flow_index = []
         for i in range(a, b + 1):
-            # Concurrent flow theta variable
-            # Lets give an epsilon for the lb, so that the inverse doesn't go to infinity
-            theta[i] = model.addVar(lb=1e-6, ub=1)
-            # auxiliary variable corresponding to the inverse of theta
-            T[i] = model.addVar(lb=0,ub=20*1e6) # setting a max 20 milliseconds limit for the transmission delay
             for (s, t, _) in self.steps[i - 1]:
-                # print("adding flow var for step", i-1)
                 for u in range(self.n):
                     for v in range(self.n):
                         if u != v:
-                            # flow variable for ith step, for demand s,t, traversing edge u,v
-                            f[i, s, t, u, v] = model.addVar(lb=0, ub=self.d)
+                            flow_index.append((i, s, t, u, v))
+
+        f = model.addVars(flow_index,lb=0,ub=self.d,name="f")
+
 
         model.update()
 
