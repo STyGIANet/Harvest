@@ -22,6 +22,8 @@ def main():
         doc = json.load(f)
 
     n = doc["n"]
+    dims = doc["dims"]
+    print(dims)
     # Note: Size is converted to bits here
     steps = [[(u, v, m * 8) for (u, v, m) in s["demand"]] for s in doc["steps"]]
 
@@ -34,6 +36,7 @@ def main():
         alpha=alpha,
         delta=delta,
         alpha_r=alpha_r,
+        dims = dims,
         logging = logging,
     )
 

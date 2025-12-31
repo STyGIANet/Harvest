@@ -18,6 +18,7 @@ class DPScheduler:
         alpha: float,
         delta: float,
         alpha_r: float,
+        dims: List[int],
         logging: int,
     ):
         self.steps = steps
@@ -29,6 +30,7 @@ class DPScheduler:
         self.alpha = alpha
         self.delta = delta
         self.alpha_r = alpha_r
+        self.dims = dims
         self.logging = logging
         self._cache: Dict[Tuple[int, int], Tuple[Topology, float]] = {}
 
@@ -69,7 +71,7 @@ class DPScheduler:
                     for v in range(self.n):
                         if u != v:
                             # flow variable for ith step, for demand s,t, traversing edge u,v
-                            f[i, s, t, u, v] = model.addVar(lb=0)
+                            f[i, s, t, u, v] = model.addVar(lb=0, ub=self.d)
 
         model.update()
 
