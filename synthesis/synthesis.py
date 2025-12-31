@@ -28,11 +28,12 @@ class DPScheduler:
 
     def completion_time(self, a: int, b: int) -> Tuple[Topology, float]:
         key = (a, b)
+        print(f'Solving for steps a={a}, b={b}')
         if key in self._cache:
             return self._cache[key]
 
         model = gp.Model()
-        model.Params.OutputFlag = 0
+        # model.Params.OutputFlag = 0
         model.Params.MIPFocus = 1
         model.Params.Heuristics = 0.5
 
@@ -41,7 +42,7 @@ class DPScheduler:
             for v in range(self.n):
                 if u != v:
                     # number of edges between u,v. This can also be interpreted as the capacity between u,v
-                    x[u, v] = model.addVar(vtype=GRB.BINARY, lb=0)
+                    x[u, v] = model.addVar(vtype=GRB.INTEGER, lb=0)
 
         theta = {}
         T = {}
@@ -65,19 +66,19 @@ class DPScheduler:
 
         # Degree constraints
         for u in range(self.n):
-            model.addConstr(gp.quicksum(x[u, v] for v in range(self.n) if u != v) <= self.d)
-            model.addConstr(gp.quicksum(x[v, u] for v in range(self.n) if u != v) <= self.d)
+            model.addConstr(gp.quicksum(x[u, v] for v in range(self.n) if u != v) == self.d)
+            model.addConstr(gp.quicksum(x[v, u] for v in range(self.n) if u != v) == self.d)
 
         # Flow conservation and demand constraints
         for i in range(a, b + 1): # For each step between a, b (including)
-            for (s, t, demand) in self.steps[i - 1]: # Note: steps are indexed from 1
+            for (s, t, _) in self.steps[i - 1]: # Note: Algorithm's steps are indexed from 1
                 for u in range(self.n):
                     outflow = gp.quicksum(f[i, s, t, u, v] for v in range(self.n) if u != v)
                     inflow = gp.quicksum(f[i, s, t, v, u] for v in range(self.n) if u != v)
                     if u == s:
-                        model.addConstr(outflow - inflow == theta[i] * demand)
+                        model.addConstr(outflow - inflow >= theta[i])
                     elif u == t:
-                        model.addConstr(outflow - inflow == -theta[i] * demand)
+                        model.addConstr(outflow - inflow <= -theta[i])
                     else:
                         model.addConstr(outflow - inflow == 0)
 
@@ -88,7 +89,7 @@ class DPScheduler:
                     if u != v:
                         model.addConstr(
                             gp.quicksum(f[i, s, t, u, v] for (s, t, _) in self.steps[i - 1])
-                            <= self.c * x[u, v]
+                            <= x[u, v]
                         )
 
         for i in range(a, b + 1):
