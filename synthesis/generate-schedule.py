@@ -10,9 +10,9 @@ def main():
 
     in_file = sys.argv[1]
     d = int(sys.argv[2])
-    c = float(sys.argv[3])*1e9 # c in the command line arguments must be specified as Gbps
+    c = float(sys.argv[3]) # c in the command line arguments must be specified as Gbps
     beta = 1/c
-    alpha_r = float(sys.argv[4])*1e-9
+    alpha_r = float(sys.argv[4]) # nanoseconds
     out_file = sys.argv[5]
 
     with open(in_file) as f:
@@ -20,7 +20,7 @@ def main():
 
     n = doc["n"]
     # Note: Size is converted to bits here
-    steps = [[(u, v, c * 8) for (u, v, c) in s["demand"]] for s in doc["steps"]]
+    steps = [[(u, v, m * 8) for (u, v, m) in s["demand"]] for s in doc["steps"]]
 
     scheduler = DPScheduler(
         steps=steps,

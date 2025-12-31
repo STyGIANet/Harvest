@@ -92,9 +92,8 @@ class DPScheduler:
         for i in range(a, b + 1):
             # We assume that m_i is same across all nodes,
             # even in multi-port case i.e., same size sent on all ports
-            _, _, _bytes =  self.steps[i - 1][0]
-            # print(_bytes)
-            model.addQConstr(theta[i] * T[i] >= self.beta * _bytes)
+            _, _, _bits =  self.steps[i - 1][0]
+            model.addQConstr(theta[i] * T[i] >= self.beta * _bits)
 
         model.setObjective(gp.quicksum(T[i] for i in range(a, b + 1)), GRB.MINIMIZE)
         model.optimize()
