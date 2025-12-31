@@ -1,6 +1,6 @@
 import json
 import sys
-from typing import Tuple
+from typing import List, Tuple
 from collectives import (
     reduceScatterRecursiveDoubling,
     allGatherRecursiveDoubling,
@@ -19,6 +19,7 @@ from collectives import (
     binaryTreeBroadcast,
     bruckAllToAll,
     bruckConcatenation,
+    PatternStep,
     _parseDims,
 )
 
@@ -124,6 +125,21 @@ def main():
         else:
             raise ValueError(f"unknown collective: {collective}")
 
+
+        # In case there are multiple ports send to the same destination, then merge then into single entry (add the size)
+        coll: List(PatternStep) = []
+        for s in steps:
+            i = s.id
+            demand: List[Pair] = []
+            for (u, v, c) in s.demand:
+                if (u,v,c) in demand:
+                    print(u,v,c)
+                    print(demand.index((u,v,c)))
+                    demand[demand.index((u,v,c))]=(u,v,demand[demand.index((u,v,c))][2]+c)
+                else:
+                    demand.append((u,v,c))
+            coll.append(PatternStep(id=i, demand=demand))
+
         doc = {
             "schema": "collective_pattern/v1",
             "collective": collective,
@@ -133,7 +149,7 @@ def main():
             "units": "bytes",
             "steps": [
                 {"id": s.id, "demand": [[u, v, c] for (u, v, c) in s.demand]}
-                for s in steps
+                for s in coll
             ],
         }
 
