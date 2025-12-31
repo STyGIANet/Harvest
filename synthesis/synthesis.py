@@ -2,21 +2,10 @@ from typing import List, Tuple, Dict
 import math
 import gurobipy as gp
 from gurobipy import GRB
-from multiprocessing import get_context
-
-# each instance of gurobi will be limited by numThreads
-# This script will parallelize multiple runs across k values, in total limited by totalThreads
-numThreads = 4
-totalThreads = 20
 
 Pair = Tuple[int, int, int]
 Topology = Dict[Tuple[int, int], int]
 
-def _solve_for_k(args):
-    scheduler, k = args
-    cost_no_reconf, sched = scheduler.synthesize_for_k(k)
-    total_cost = cost_no_reconf + k * scheduler.alpha_r
-    return k, total_cost, sched
 
 class DPScheduler:
     def __init__(
@@ -42,7 +31,6 @@ class DPScheduler:
         if key in self._cache:
             return self._cache[key]
 
-        env = gp.Env(params={"Threads": numThreads})
         model = gp.Model()
         model.Params.OutputFlag = 0
 
@@ -187,11 +175,11 @@ class DPScheduler:
     def synthesize(self) -> Tuple[float, List[Tuple[Topology, int]]]:
         best_cost = math.inf
         best_schedule: List[Tuple[Topology, int]] = []
-        ctx = get_context("spawn")
-        tasks = [(self, k) for k in range(0, self.s + 1)]
-        with ctx.Pool(processes=min(self.s + 1, int(totalThreads/numThreads))) as pool:
-            results = pool.map(_solve_for_k, tasks)
-        for k, total_cost, sched in results:
+        for k in range(0, self.s + 1):
+            cost_no_reconf, sched = self.synthesize_for_k(k)
+            # print(k,sched)
+            total_cost = cost_no_reconf + k * self.alpha_r
+            # print("k=",k,"cost=",total_cost)
             if total_cost < best_cost:
                 best_cost = total_cost
                 best_schedule = sched
