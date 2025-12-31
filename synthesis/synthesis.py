@@ -76,9 +76,11 @@ class DPScheduler:
                     for v in range(self.n):
                         if u != v:
                             flow_index.append((i, s, t, u, v))
-
+        if self.logging:
+            print("adding flow vars")
         f = model.addVars(flow_index,lb=0,ub=self.d,name="f")
-
+        if self.logging:
+            print("finished adding flow vars")
 
         model.update()
 
