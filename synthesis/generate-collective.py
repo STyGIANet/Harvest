@@ -133,8 +133,6 @@ def main():
             demand: List[Pair] = []
             for (u, v, c) in s.demand:
                 if (u,v,c) in demand:
-                    print(u,v,c)
-                    print(demand.index((u,v,c)))
                     demand[demand.index((u,v,c))]=(u,v,demand[demand.index((u,v,c))][2]+c)
                 else:
                     demand.append((u,v,c))
