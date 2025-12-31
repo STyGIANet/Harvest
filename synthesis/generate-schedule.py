@@ -3,7 +3,7 @@ import sys
 from synthesis import DPScheduler
 
 def main():
-    if len(sys.argv) != 6:
+    if len(sys.argv) != 9:
         raise SystemExit(
             "usage: python generate-schedule.py collective.json d c alpha_r out.json"
         )
@@ -12,8 +12,11 @@ def main():
     d = int(sys.argv[2])
     c = float(sys.argv[3]) # c in the command line arguments must be specified as Gbps
     beta = 1/c
-    alpha_r = float(sys.argv[4]) # nanoseconds
-    out_file = sys.argv[5]
+    alpha = float(sys.argv[4]) # setup delay (nanoseconds)
+    delta = float(sys.argv[5]) # propagation delay (nanoseconds)
+    alpha_r = float(sys.argv[6]) # reconfiguration delay (nanoseconds)
+    logging = int(sys.argv[7])
+    out_file = sys.argv[8]
 
     with open(in_file) as f:
         doc = json.load(f)
@@ -28,7 +31,10 @@ def main():
         d=d,
         c=c,
         beta=beta,
+        alpha=alpha,
+        delta=delta,
         alpha_r=alpha_r,
+        logging = logging,
     )
 
     cost, schedule = scheduler.synthesize()

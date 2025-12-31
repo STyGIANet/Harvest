@@ -15,7 +15,10 @@ class DPScheduler:
         d: int,
         c: float,
         beta: float,
+        alpha: float,
+        delta: float,
         alpha_r: float,
+        logging: int,
     ):
         self.steps = steps
         self.s = len(steps)
@@ -23,17 +26,23 @@ class DPScheduler:
         self.d = d
         self.c = c
         self.beta = beta
+        self.alpha = alpha
+        self.delta = delta
         self.alpha_r = alpha_r
+        self.logging = logging
         self._cache: Dict[Tuple[int, int], Tuple[Topology, float]] = {}
 
     def completion_time(self, a: int, b: int) -> Tuple[Topology, float]:
         key = (a, b)
-        print(f'Solving for steps a={a}, b={b}')
+        
         if key in self._cache:
             return self._cache[key]
+        else:
+            if self.logging==1:
+                print(f'\n\n\n\n##### Solving for steps a={a}, b={b} #####')
 
         model = gp.Model()
-        # model.Params.OutputFlag = 0
+        model.Params.OutputFlag = self.logging
         model.Params.MIPFocus = 1
         model.Params.Heuristics = 0.5
 
@@ -93,12 +102,12 @@ class DPScheduler:
                         )
 
         for i in range(a, b + 1):
-            # We assume that m_i is same across all nodes,
+            # We assume that m_i is same across all nodes within a single step,
             # even in multi-port case i.e., same size sent on all ports
             _, _, _bits =  self.steps[i - 1][0]
             model.addQConstr(theta[i] * T[i] >= self.beta * _bits)
 
-        model.setObjective(gp.quicksum(T[i] for i in range(a, b + 1)), GRB.MINIMIZE)
+        model.setObjective(gp.quicksum(self.alpha*(b-a+1)+T[i]*(1+ self.delta/(self.beta * _bits)) for i in range(a, b + 1)), GRB.MINIMIZE)
         model.optimize()
 
         if model.Status != GRB.OPTIMAL:
