@@ -39,7 +39,7 @@ class DPScheduler:
             for v in range(self.n):
                 if u != v:
                     # number of edges between u,v. This can also be interpreted as the capacity between u,v
-                    x[u, v] = model.addVar(vtype=GRB.INTEGER, lb=0)
+                    x[u, v] = model.addVar(vtype=GRB.BINARY, lb=0)
 
         theta = {}
         T = {}
