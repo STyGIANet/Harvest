@@ -1,0 +1,3 @@
+export GUROBI_HOME=$(pwd)/gurobi1300/linux64
+export PATH=$GUROBI_HOME/bin:$PATH
+export LD_LIBRARY_PATH=$GUROBI_HOME/lib:$LD_LIBRARY_PATH
