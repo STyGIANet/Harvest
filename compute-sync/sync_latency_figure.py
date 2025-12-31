@@ -40,10 +40,10 @@ plt.rcParams.update({
 df = pd.read_csv("p2p_master_worker_times.csv")
 
 # Scale y-axis values by 10^6
-df["total_gpu_execution_time_us"] = df["total_gpu_execution_time_us"] * 1e6
+# df["total_gpu_execution_time_us"] = df["total_gpu_execution_time_us"] * 1e6
 
 # Restrict to domains up to 64 GPUs
-df = df[df["totalOperations"] <= 64]
+df = df[df["totalOperations"] <= 1024]
 
 # Create the boxplot
 plt.figure(figsize=(8, 6))
