@@ -37,23 +37,23 @@ plt.rcParams.update({
 })
 
 # Read the CSV file
-df = pd.read_csv("p2p_NonUnified_gpu_times.csv")
+df = pd.read_csv("p2p_master_worker_times.csv")
 
 # Scale y-axis values by 10^6
-df["total_gpu_execution_time_ns"] = df["total_gpu_execution_time_ms"] * 1e6
+df["total_gpu_execution_time_us"] = df["total_gpu_execution_time_us"] * 1e6
 
 # Restrict to domains up to 64 GPUs
 df = df[df["totalOperations"] <= 64]
 
 # Create the boxplot
 plt.figure(figsize=(8, 6))
-df.boxplot(column="total_gpu_execution_time_ns",
+df.boxplot(column="total_gpu_execution_time_us",
            by="totalOperations",
            grid=True)
 
 # Labels and title
 plt.xlabel("Number of GPUs")
-plt.ylabel("Latency (ns)")
+plt.ylabel("Latency (us)")
 plt.suptitle("")  # remove auto title
 plt.title("")
 
