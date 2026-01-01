@@ -57,7 +57,7 @@ DELTAS=(10000 10 100 10000)
 ############# 1D AllGather #############
 
 # NODES=(4 8 16 32 64 128)
-NODES=(64)
+NODES=(8 16 64)
 PORTS=(2)
 ALGS=(all-to-all all-gather-rd-nd all-gather-swing-nd)
 
