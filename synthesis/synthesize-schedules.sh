@@ -82,7 +82,7 @@ for N in ${NODES[@]};do
 								echo "waiting at $NUM_EXPS..."
 							done
 							echo "python synthesize-schedule.py $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $OUTFILE"
-							time (python synthesize-schedule.py $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $OUTFILE) &
+							time (python synthesize-schedule.py $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $OUTFILE; echo "################################"; echo $OUTFILE; echo "############################") &
 						done
 					done
 				done
