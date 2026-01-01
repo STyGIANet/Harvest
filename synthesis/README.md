@@ -20,6 +20,8 @@ uv pip install -r requirements.txt
 
 # Generate collectives
 
+Many collectives can be generated in one-shot using `$ ./generate-collectives.sh`.
+
 The general format is as follows:
 
 ```
@@ -59,12 +61,12 @@ For Bruck's algorithm, we use a special format to indicate the `r` and `p` param
 python3 generate-collective.py 27 81 bruckallgather-r3-p3 out.json
 ```
 
-# Generate Topology Schedules
+# Synthesize Topology Schedules
 
-To generate a topology, we need a collective given as input in json format, the in-out degree for each node, link capacity (in Gbps), alpha_r (in nanoseconds), and path to output file.
+To synthesize a topology schedule, we need a collective given as input in json format, the in-out degree for each node, link capacity (in Gbps), alpha_r (in nanoseconds), and path to output file.
 
 ```
-python generate-schedule.py collective.json degree capacity alpha delta alpha_r relaxation logging out.json
+python synthesize-schedule.py collective.json degree capacity alpha delta alpha_r relaxation logging out.json
 ```
 
 - `degree`: number of incoming and outgoing edges
