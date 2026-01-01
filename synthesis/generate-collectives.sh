@@ -2,7 +2,7 @@
 
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DUMP_DIR=$SCRIPT_DIR/configs
+DUMP_DIR=$SCRIPT_DIR/collectives
 if [[ ! -d $DUMP_DIR ]];then
 	mkdir -p $DUMP_DIR
 fi

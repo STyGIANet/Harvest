@@ -2,10 +2,12 @@
 
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DUMP_DIR=$SCRIPT_DIR/configs
+DUMP_DIR=$SCRIPT_DIR/topologies
 if [[ ! -d $DUMP_DIR ]];then
 	mkdir -p $DUMP_DIR
 fi
+
+# In progress...
 
 # Few examples:
 # python3 generate-collective.py 4x4 67108864 4 reduce-scatter-rd-nd out.json
