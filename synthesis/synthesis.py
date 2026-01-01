@@ -38,6 +38,26 @@ class DPScheduler:
         self.logging = logging
         self._cache: Dict[Tuple[int, int], Tuple[Topology, float]] = {}
 
+    def ringNext(self,u, n):
+        return (u + 1) % n
+
+    def ringPrev(self,u, n):
+        return (u - 1) % n
+
+    def torusNeighbors(self,u, dims):
+        X, Y = dims
+        y = u % Y
+        x = u // Y
+
+        nbrs = [
+            ((x + 1) % X, y),
+            ((x - 1) % X, y),
+            (x, (y + 1) % Y),
+            (x, (y - 1) % Y),
+        ]
+        return [(nx * Y + ny) for (nx, ny) in nbrs]
+
+
     def completion_time(self, a: int, b: int) -> Tuple[Topology, float]:
         key = (a, b)
         
@@ -54,18 +74,45 @@ class DPScheduler:
         model.Params.Cuts = 1
         model.Params.NonConvex = 2
         model.Params.MIPGap = 0.1
-        # model.Params.TimeLimit = 30
+        model.Params.TimeLimit = 60
 
 
+        # x = {}
+        # for u in range(self.n):
+        #     for v in range(self.n):
+        #         if u != v:
+        #             # number of edges between u,v. This can also be interpreted as the capacity between u,v
+        #             if self.relaxation == 1:
+        #                 x[u, v] = model.addVar(vtype=GRB.CONTINUOUS, lb=0)
+        #             else:
+        #                 x[u, v] = model.addVar(vtype=GRB.INTEGER, lb=0)
         x = {}
         for u in range(self.n):
             for v in range(self.n):
-                if u != v:
-                    # number of edges between u,v. This can also be interpreted as the capacity between u,v
-                    if self.relaxation == 1:
-                        x[u, v] = model.addVar(vtype=GRB.CONTINUOUS, lb=0)
-                    else:
-                        x[u, v] = model.addVar(vtype=GRB.INTEGER, lb=0)
+                if u == v:
+                    continue
+
+                startVal = 0
+
+                if self.d == 1:
+                    if v == self.ringNext(u, self.n):
+                        startVal = 1
+
+                elif self.d == 2:
+                    if v == self.ringNext(u, self.n) or v == self.ringPrev(u, self.n):
+                        startVal = 1
+
+                elif self.d == 4:
+                    if v in self.torusNeighbors(u, self.dims):
+                        startVal = 1
+
+                if self.relaxation == 1:
+                    x[u, v] = model.addVar(vtype=GRB.CONTINUOUS, lb=0, name=f"x[{u},{v}]")
+                else:
+                    x[u, v] = model.addVar(vtype=GRB.INTEGER, lb=0, name=f"x[{u},{v}]")
+
+                x[u, v].Start = startVal
+
 
         I = list(range(a, b + 1))
         # Concurrent flow theta variable
