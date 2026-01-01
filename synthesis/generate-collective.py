@@ -104,7 +104,7 @@ def main():
             "ports": ports,
             "units": "bytes",
             "steps": [
-                {"id": s.id, "demand": [[u, v, c] for (u, v, c) in s.demand]}
+                {"id": s.id, "chunksize":s.chunksize, "demand": [[u, v, c] for (u, v, c) in s.demand]}
                 for s in steps
             ],
         }

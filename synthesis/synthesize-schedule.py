@@ -5,7 +5,7 @@ from synthesis import DPScheduler
 def main():
     if len(sys.argv) != 10:
         raise SystemExit(
-            "usage: python generate-schedule.py collective.json d c alpha_r out.json"
+            "usage: python synthesize-schedule.py collective.json degree capacity alpha delta alpha_r relaxation logging out.json"
         )
 
     in_file = sys.argv[1]
