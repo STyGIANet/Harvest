@@ -63,12 +63,12 @@ ALGS=(all-to-all all-gather-rd-nd all-gather-swing-nd)
 
 echo "Generating 1D AllGather"
 NUM_EXPS=0
-for BANDWIDTH in ${BANDWIDTHS[@]};do
-	for ALPHA_DELTA_ID in ${!ALPHAS[@]};do
-		ALPHA=${ALPHAS[$ALPHA_DELTA_ID]}
-		DELTA=${DELTAS[$ALPHA_DELTA_ID]}
-		for ALPHA_R in ${ALPHARS[@]};do
-			for N in ${NODES[@]};do
+for N in ${NODES[@]};do
+	for BANDWIDTH in ${BANDWIDTHS[@]};do
+		for ALPHA_DELTA_ID in ${!ALPHAS[@]};do
+			ALPHA=${ALPHAS[$ALPHA_DELTA_ID]}
+			DELTA=${DELTAS[$ALPHA_DELTA_ID]}
+			for ALPHA_R in ${ALPHARS[@]};do
 				for P in ${PORTS[@]};do
 					for ALG in ${ALGS[@]};do
 						for IDX in ${!MESSAGE_SIZES[@]};do
