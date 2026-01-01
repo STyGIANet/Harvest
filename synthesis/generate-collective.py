@@ -60,6 +60,8 @@ def main():
         collective = sys.argv[3]
         out = sys.argv[4]
 
+        ports = 1
+
         if collective == "reduce-scatter-rd":
             steps = reduceScatterRecursiveDoubling(n, m)
         elif collective == "all-gather-rd":
@@ -93,10 +95,13 @@ def main():
         else:
             raise ValueError(f"unknown collective: {collective}")
 
+        dims=[n]
         doc = {
             "schema": "collective_pattern/v1",
             "collective": collective,
             "n": n,
+            "dims": dims,
+            "ports": ports,
             "units": "bytes",
             "steps": [
                 {"id": s.id, "demand": [[u, v, c] for (u, v, c) in s.demand]}

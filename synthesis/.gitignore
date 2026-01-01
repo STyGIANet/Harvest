@@ -3,3 +3,4 @@ __pycache__/
 .venv/
 gurobi1300/
 *tar.gz
+configs/
