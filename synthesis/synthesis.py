@@ -51,6 +51,11 @@ class DPScheduler:
         model.Params.OutputFlag = self.logging
         model.Params.MIPFocus = 1
         model.Params.Heuristics = 0.5
+        model.Params.Cuts = 1
+        model.Params.NonConvex = 2
+        model.Params.MIPGap = 0.1
+        # model.Params.TimeLimit = 30
+
 
         x = {}
         for u in range(self.n):
@@ -218,7 +223,7 @@ class DPScheduler:
         num_steps: int,
     ) -> List[Topology]:
         per_step = [None] * num_steps
-
+        print((schedule))
         cur_step = 1
         for topo, b in schedule:
             end = b - 1
