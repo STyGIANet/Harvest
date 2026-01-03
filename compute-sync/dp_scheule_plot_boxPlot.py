@@ -52,7 +52,7 @@ plt.title("")
 
 # Labels and title
 plt.xlabel("Number of nodes")
-plt.ylabel("Compute time ("+r'$\mu$'+")")
+plt.ylabel("Compute time ("+r'$\mu$'+"s)")
 plt.suptitle("")  # Removes the automatic "Boxplot grouped by n"
 
 # Save plot to PDF

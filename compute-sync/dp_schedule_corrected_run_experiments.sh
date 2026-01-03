@@ -1,4 +1,18 @@
 #!/bin/bash
+set -e  # Exit immediately if compilation or execution fails
+
+# =========================
+# Build step
+# =========================
+SRC="dp_schedule_corrected.cu"
+BIN="dp_schedule_corrected"
+
+echo "Compiling $SRC -> $BIN"
+nvcc -O3 -use_fast_math -std=c++17 "$SRC" -o "$BIN"
+
+# =========================
+# Experiment configuration
+# =========================
 
 # Output CSV file
 outfile="dp_schedule_corrected_experiment_results.csv"
@@ -7,7 +21,11 @@ outfile="dp_schedule_corrected_experiment_results.csv"
 runs=10
 
 # Program and arguments
-cmd="./dp_schedule_corrected -n 8 -m 1000000 --delta 500 --bw 800 --reconf 1"
+cmd="./$BIN -n 8 -m 1000000 --delta 500 --bw 800 --reconf 1"
+
+# =========================
+# Run experiments
+# =========================
 
 # Write CSV header
 echo "n,timeMicro" > "$outfile"
