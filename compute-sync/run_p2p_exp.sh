@@ -14,7 +14,7 @@ OUTFILE="p2p_master_worker_times.csv"
 echo "totalOperations,total_gpu_execution_time_us" > "$OUTFILE"
 
 # Loop over totalOperations from 2 to 1024 (powers of 2)
-for totalOps in 2 4 8 16 32 64 128 256 512 1024; do
+for totalOps in 2 4 8 16 32 64 128 256; do
     for run in {1..10}; do
         # Run the program and capture output
         output=$($EXEC $totalOps 100)
