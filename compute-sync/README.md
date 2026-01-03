@@ -44,7 +44,7 @@ This experiment measures **master/worker synchronization latency** on two physic
 From the repository root, run:
 
 ```bash
-bash run-p2p-exp.sh
+./run_p2p_exp.sh
 ```
 
 This script:
