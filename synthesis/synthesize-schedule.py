@@ -27,7 +27,7 @@ def main():
 
     # Note: Size is converted to bits here
     steps = [[(u, v, m * 8) for (u, v, m) in s["demand"]] for s in doc["steps"]]
-    chunksizes = [s["chunksize"] for s in doc["steps"]]
+    chunksizes = [s["chunksize"] * 8 for s in doc["steps"]]
     
     scheduler = DPScheduler(
         steps=steps,

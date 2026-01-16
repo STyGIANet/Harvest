@@ -173,7 +173,7 @@ class DPScheduler:
             _bits = self.chunksizes[i-1]
             model.addQConstr(theta[i] * T[i] == self.beta * _bits)
 
-        model.setObjective(gp.quicksum(self.alpha*(b-a+1)+T[i]*(1+ self.delta/(self.beta * self.chunksizes[i-1])) for i in range(a, b + 1)), GRB.MINIMIZE)
+        model.setObjective(gp.quicksum(self.alpha+T[i]*(1+ self.delta/(self.beta * self.chunksizes[i-1])) for i in range(a, b + 1)), GRB.MINIMIZE)
         model.optimize()
 
         if model.Status != GRB.OPTIMAL:
