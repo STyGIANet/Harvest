@@ -68,6 +68,9 @@ class DPScheduler:
             if self.logging==1:
                 print(f'\n\n\n\n##### Solving for steps a={a}, b={b} #####')
 
+        print(f'\n\n\n\n##### Solving for steps a={a}, b={b} #####')
+        print("total = ", topoSpace)
+
         model = gp.Model()
         model.Params.OutputFlag = self.logging
         model.Params.MIPFocus = 1
