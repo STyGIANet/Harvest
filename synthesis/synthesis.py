@@ -25,6 +25,7 @@ class DPScheduler:
         chunksizes: List[int],
         relaxation: int,
         logging: int,
+        rd: int,
     ):
         self.steps = steps
         self.s = len(steps)
@@ -39,6 +40,7 @@ class DPScheduler:
         self.chunksizes = chunksizes
         self.relaxation = relaxation
         self.logging = logging
+        self.rd = rd
         self._cache: Dict[Tuple[int, int], Tuple[Topology, float]] = {}
 
         model = gp.Model()
@@ -124,23 +126,29 @@ class DPScheduler:
         z = {}
         y = {}
         topoSpace = 0
-        for i in range(1,self.s+1):
+        if self.rd == 1:
+            start = a
+            end = a+1
+        else:
+            start = 1
+            end = self.s+1
+        for i in range(start,end):
         # for i in range(1,a+1):
-        #     if i>len(self.steps):
-        #         continue
+            if i>len(self.steps):
+                continue
             topoSpace = topoSpace + 1
             # direct connect topo corresponding to step i
-            y[i-1] = {}
+            y[i-start] = {}
             for u in range(self.n):
                 for v in range(self.n):
-                    y[i-1][u,v]=0
+                    y[i-start][u,v]=0
             for (s, t, demand) in self.steps[i - 1]:
                 # interpreted as the ideal number of links for direct transmission
-                y[i-1][s,t]=int(demand/self.chunksizes[i-1])
+                y[i-start][s,t]=int(demand/self.chunksizes[i-1])
 
-        if self.logging == 1:
-            print(f'\n\n\n\n##### Solving for steps a={a}, b={b} #####')
-            print("total = ", topoSpace)
+        # if self.logging == 1:
+        print(f'\n\n\n\n##### Solving for steps a={a}, b={b} #####')
+        print("total = ", topoSpace)
 
         # ToDo: Could add other relevant topos to the topoSpace
 
@@ -204,9 +212,10 @@ class DPScheduler:
             else:
                 objectiveValue.append(model.ObjVal)
             
-            if self.logging:
-                print("instanceTime =",(time.perf_counter_ns()-tsprime)/1e9)
+            # if self.logging:
+            print("instanceTime =",(time.perf_counter_ns()-tsprime)/1e9)
 
+        # print(objectiveValue)
         minIndex, minObj = min(enumerate(objectiveValue), key=lambda lam: lam[1])
         topo: Topology = y[minIndex]
         topo = {k: v for k, v in topo.items() if v != 0}
@@ -226,7 +235,7 @@ class DPScheduler:
         nxt = [[None] * (k + 1) for _ in range(self.s + 2)]
         topo = [[None] * (k + 1) for _ in range(self.s + 2)]
 
-        for a in range(1, self.s + 2):
+        for a in range(1, self.s + 1):
             b = self.s + 1
             G, cost = self.completion_time(a, b-1)
             # print ("a,b,t",a,b,0,k)

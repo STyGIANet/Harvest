@@ -66,7 +66,7 @@ python3 generate-collective.py 27 81 bruckallgather-r3-p3 out.json
 To synthesize a topology schedule, we need a collective given as input in json format, the in-out degree for each node, link capacity (in Gbps), alpha_r (in nanoseconds), and path to output file.
 
 ```
-python synthesize-schedule.py collective.json degree capacity alpha delta alpha_r logging relaxation out.json
+python synthesize-schedule.py collective.json degree capacity alpha delta alpha_r logging relaxation simplify out.json
 ```
 
 - `degree`: number of incoming and outgoing edges
@@ -76,3 +76,4 @@ python synthesize-schedule.py collective.json degree capacity alpha delta alpha_
 - `alpha_r`: reconfiguration delay (nanoseconds)
 - `logging`: whether to log output from gurobi
 - `relaxation`: Relaxes the edge variables to fractional, otherwise considered as integer variables
+- `simplify`: This technique is optimal for recursive doubling, but can be used for other collectives as well. Essentially, the selection of topology for an interval (a,b) steps is based on step a's communication.

@@ -3,7 +3,7 @@ import sys
 from synthesis import DPScheduler
 
 def main():
-    if len(sys.argv) != 10:
+    if len(sys.argv) != 11:
         raise SystemExit(
             "usage: python synthesize-schedule.py collective.json degree capacity alpha delta alpha_r relaxation logging out.json"
         )
@@ -17,7 +17,8 @@ def main():
     alpha_r = float(sys.argv[6]) # reconfiguration delay (nanoseconds)
     logging = int(sys.argv[7])
     relaxation = int(sys.argv[8])
-    out_file = sys.argv[9]
+    rd = int(sys.argv[9])
+    out_file = sys.argv[10]
 
     with open(in_file) as f:
         doc = json.load(f)
@@ -42,6 +43,7 @@ def main():
         chunksizes=chunksizes,
         relaxation=relaxation,
         logging = logging,
+        rd = rd,
     )
 
     cost, schedule = scheduler.synthesize()
