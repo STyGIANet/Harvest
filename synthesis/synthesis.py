@@ -208,9 +208,9 @@ class DPScheduler:
                 # print()
                 topoSpace = topoSpace + 1
 
-        if self.logging == 1:
-            print(f'\n\n\n\n##### Solving for steps a={a}, b={b} #####')
-            print("total = ", topoSpace)
+        # if self.logging == 1:
+        print(f'\n\n\n\n##### Solving for steps a={a}, b={b} #####')
+        print("total = ", topoSpace)
 
         # ToDo: Could add other relevant topos to the topoSpace
 
@@ -274,8 +274,8 @@ class DPScheduler:
             else:
                 objectiveValue.append(model.ObjVal)
             
-            if self.logging:
-                print("instanceTime =",(time.perf_counter_ns()-tsprime)/1e9)
+            # if self.logging:
+            print("instanceTime =",(time.perf_counter_ns()-tsprime)/1e9)
 
         minIndex, minObj = min(enumerate(objectiveValue), key=lambda lam: lam[1])
         # print(minIndex, minObj)
