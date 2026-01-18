@@ -110,6 +110,29 @@ class DPScheduler:
         ]
         return [(nx * Y + ny) for (nx, ny) in nbrs]
 
+    def base_topology(self):
+        base = {}
+        for u in range(self.n):
+            for v in range(self.n):
+                if u == v:
+                    continue
+
+                val = 0
+                if self.d == 1:
+                    if v == self.ringNext(u, self.n):
+                        val = 1
+                elif self.d == 2:
+                    if v == self.ringNext(u, self.n) or v == self.ringPrev(u, self.n):
+                        val = 1
+                elif self.d == 4:
+                    if v in self.torusNeighbors(u, self.dims):
+                        val = 1
+
+                if val:
+                    base[(u, v)] = 1
+                else:
+                    base[(u, v)] = 0
+        return base
 
     def completion_time(self, a: int, b: int) -> Tuple[Topology, float]:
         key = (a, b)
@@ -126,29 +149,68 @@ class DPScheduler:
         z = {}
         y = {}
         topoSpace = 0
+
+
+        # A base topology as a safe fallback that is capable of serving any step
+        base = self.base_topology()
+        for shift in range(self.n-1):
+            if shift!=0 and math.gcd(shift, self.n) != 1:
+                continue
+            if self.rd == 1 and shift>=1:
+                break
+            y[topoSpace] = {}
+            for u in range(self.n):
+                for v in range(self.n):
+                    if u==v:
+                        continue
+                    y[topoSpace][u,v]=0
+            for (u, v), val in base.items():
+                uprime = (u) % self.n
+                vprime = (v + shift) % self.n
+                if uprime==vprime:
+                    continue
+                y[topoSpace][uprime, vprime] = val
+            topoSpace += 1
+
+        # Collection of topologies to choose from
         if self.rd == 1:
             start = a
             end = a+1
         else:
             start = 1
             end = self.s+1
+
         for i in range(start,end):
         # for i in range(1,a+1):
             if i>len(self.steps):
                 continue
-            topoSpace = topoSpace + 1
             # direct connect topo corresponding to step i
-            y[i-start] = {}
+            y[topoSpace] = {}
+            temp = {}
             for u in range(self.n):
                 for v in range(self.n):
-                    y[i-start][u,v]=0
+                    if u==v:
+                        continue
+                    temp[u,v]=0
             for (s, t, demand) in self.steps[i - 1]:
                 # interpreted as the ideal number of links for direct transmission
-                y[i-start][s,t]=int(demand/self.chunksizes[i-1])
+                temp[s,t]=int(demand/self.chunksizes[i-1])
+            redundant = False
+            for keyprime in y.keys():
+                if temp == y[keyprime]:
+                    redundant = True
+                    # print("redundant")
+                    break
+            if redundant==False:
+                y[topoSpace] = temp
+                # print("New")
+                # print(y[topoSpace])
+                # print()
+                topoSpace = topoSpace + 1
 
-        # if self.logging == 1:
-        print(f'\n\n\n\n##### Solving for steps a={a}, b={b} #####')
-        print("total = ", topoSpace)
+        if self.logging == 1:
+            print(f'\n\n\n\n##### Solving for steps a={a}, b={b} #####')
+            print("total = ", topoSpace)
 
         # ToDo: Could add other relevant topos to the topoSpace
 
@@ -212,11 +274,11 @@ class DPScheduler:
             else:
                 objectiveValue.append(model.ObjVal)
             
-            # if self.logging:
-            print("instanceTime =",(time.perf_counter_ns()-tsprime)/1e9)
+            if self.logging:
+                print("instanceTime =",(time.perf_counter_ns()-tsprime)/1e9)
 
-        # print(objectiveValue)
         minIndex, minObj = min(enumerate(objectiveValue), key=lambda lam: lam[1])
+        # print(minIndex, minObj)
         topo: Topology = y[minIndex]
         topo = {k: v for k, v in topo.items() if v != 0}
         cost = minObj
