@@ -138,8 +138,9 @@ class DPScheduler:
                 # interpreted as the ideal number of links for direct transmission
                 y[i-1][s,t]=int(demand/self.chunksizes[i-1])
 
-        print(f'\n\n\n\n##### Solving for steps a={a}, b={b} #####')
-        print("total = ", topoSpace)
+        if self.logging == 1:
+            print(f'\n\n\n\n##### Solving for steps a={a}, b={b} #####')
+            print("total = ", topoSpace)
 
         # ToDo: Could add other relevant topos to the topoSpace
 
