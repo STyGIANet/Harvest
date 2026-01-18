@@ -55,6 +55,10 @@ class DPScheduler:
         # model.Params.PoolSolutions = 10
         # model.Params.PoolGap = 1e10
         model.Params.Threads = os.cpu_count()
+        model.Params.Method = 2
+        model.Params.BarHomogeneous = 1
+        model.Params.NumericFocus = 3
+        model.Params.Crossover = 1
         # model.Params.TimeLimit = 2
         # model.Params.Presolve = 2
 
@@ -62,9 +66,9 @@ class DPScheduler:
 
         # Concurrent flow theta variable
         # Lets give an epsilon for the lb, so that the inverse doesn't go to infinity
-        theta = model.addVars(I,lb=1e-6,ub=1,name="theta")
+        theta = model.addVars(I,lb=0,ub=1,name="theta")
         # auxiliary variable corresponding to the transmission time
-        T = model.addVars(I,lb=0,ub=20e6,name="T") # Limiting to 20 milliseconds for the transmission delay
+        T = model.addVars(I,lb=0,ub=100,name="T") # Limiting to some value for the transmission delay
         # flow variable for ith step, for demand s,t, traversing edge u,v
         flow_index = []
         for i in range(1,self.s+1):
@@ -154,8 +158,8 @@ class DPScheduler:
         # A base topology as a safe fallback that is capable of serving any step
         base = self.base_topology()
         for shift in range(self.n-1):
-            if shift!=0 and math.gcd(shift, self.n) != 1:
-                continue
+            # if math.gcd(shift+1, self.n) != 1:
+                    # continue
             if self.rd == 1 and shift>=1:
                 break
             y[topoSpace] = {}
@@ -170,7 +174,7 @@ class DPScheduler:
                 if uprime==vprime:
                     continue
                 y[topoSpace][uprime, vprime] = val
-            topoSpace += 1
+            topoSpace = topoSpace + 1
 
         # Collection of topologies to choose from
         if self.rd == 1:
@@ -203,13 +207,13 @@ class DPScheduler:
                     break
             if redundant==False:
                 y[topoSpace] = temp
-                # print("New")
+                # print("New",a,b)
                 # print(y[topoSpace])
                 # print()
                 topoSpace = topoSpace + 1
 
         if self.logging == 1:
-            # print(f'\n\n\n\n##### Solving for steps a={a}, b={b} #####')
+            print(f'\n\n\n\n##### Solving for steps a={a}, b={b} #####')
             print("total = ", topoSpace)
 
         # ToDo: Could add other relevant topos to the topoSpace
@@ -259,23 +263,26 @@ class DPScheduler:
                 # We assume that m_i is same across all nodes within a single step,
                 # even in multi-port case i.e., same size sent on all ports
                 _bits = self.chunksizes[i-1]
-                # model.addQConstr(theta[i] * T[i] == self.beta * _bits)
+                model.addQConstr(theta[i] * (T[i]*1e9) == self.beta * _bits)
                 # converting to soc constraint, see appendix
-                model.addQConstr((theta[i] - T[i]) * (theta[i] - T[i])+ 4.0 * self.beta * _bits<= (theta[i] + T[i]) * (theta[i] + T[i]))
+                # model.addQConstr((theta[i] - T[i]) * (theta[i] - T[i])+ 4.0 * self.beta * _bits<= (theta[i] + T[i]) * (theta[i] + T[i]))
 
             if self.relaxation == 1:
-                model.setObjective(gp.quicksum(self.alpha+T[i]*(1+ self.delta/(self.beta * self.chunksizes[i-1])) for i in range(a, b + 1)), GRB.MINIMIZE)
+                model.setObjective(gp.quicksum(self.alpha+T[i]*1e9*(1+ self.delta/(self.beta * self.chunksizes[i-1])) for i in range(a, b + 1)), GRB.MINIMIZE)
             else:
-                model.setObjective(gp.quicksum(self.alpha+T[i]*(1+ self.delta/(self.beta * self.chunksizes[i-1])) for i in range(a, b + 1)), GRB.MINIMIZE)
+                model.setObjective(gp.quicksum(self.alpha+T[i]*1e9*(1+ self.delta/(self.beta * self.chunksizes[i-1])) for i in range(a, b + 1)), GRB.MINIMIZE)
             model.optimize()
             if model.Status != GRB.OPTIMAL:
                 cost = math.inf
-                objectiveValue.append(cost)
+                # print(model.Status)
+                objectiveValue.append(cost) 
             else:
-                objectiveValue.append(model.ObjVal)
+                # objective value is in nanoseconds, the completion time for steps a to b
+                cost = model.ObjVal
+                objectiveValue.append(cost)
             
             if self.logging:
-                print("instanceTime =",(time.perf_counter_ns()-tsprime)/1e9)
+                print("instanceTime =",(time.perf_counter_ns()-tsprime)/1e9, cost)
 
         minIndex, minObj = min(enumerate(objectiveValue), key=lambda lam: lam[1])
         # print(minIndex, minObj)
@@ -352,8 +359,8 @@ class DPScheduler:
         best_cost = math.inf
         best_schedule: List[Tuple[Topology, int]] = []
         for k in range(0, self.s + 1):
-            if self.logging:
-                print(f"###### Solving for {k} reconfigurations")
+            # if self.logging:
+            print(f"###### Solving for {k} reconfigurations")
             cost_no_reconf, sched = self.synthesize_for_k(k)
             # print(k,sched)
             total_cost = cost_no_reconf + k * self.alpha_r
