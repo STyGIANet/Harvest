@@ -57,7 +57,7 @@ DELTAS=(10000 10 100 10000)
 ############# 1D AllGather #############
 
 # NODES=(4 8 16 32 64 128)
-NODES=(8 16 32 64)
+NODES=(64 32 8 16)
 PORTS=(2)
 ALGS=(all-to-all all-gather-rd-nd all-gather-swing-nd)
 
@@ -87,7 +87,7 @@ for N in ${NODES[@]};do
 							COLLECTIVE_FILE=$COLL_DIR/collective-$ALG-$N-$P-$MESSAGE_NAME.json
 							OUTFILE=$TOPO_DIR/topology-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.json
 							NUM_EXPS=$(( $NUM_EXPS + 1 ))
-							while [[ $(ps aux | grep synthesize-schedule | wc -l) -gt $NUM_PARALLEL ]];do
+							while [[ $(ps aux | grep '/bin/bash ./synthesize-schedule' | wc -l) -gt $NUM_PARALLEL ]];do
 								sleep 2
 								echo "waiting at $NUM_EXPS..."
 							done

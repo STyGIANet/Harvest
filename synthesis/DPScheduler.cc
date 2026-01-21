@@ -285,10 +285,10 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
 
       model.set(GRB_IntParam_OutputFlag, logging_);
       // model.set(GRB_IntParam_Threads, (int)std::max(1u, std::thread::hardware_concurrency()));
-      model.set(GRB_IntParam_Threads, 4);
+      model.set(GRB_IntParam_Threads, 2);
       model.set(GRB_IntParam_Method, 2);
-      model.set(GRB_IntParam_BarHomogeneous, 1);
-      model.set(GRB_IntParam_NumericFocus, 3);
+      model.set(GRB_IntParam_BarHomogeneous, 0);
+      model.set(GRB_IntParam_NumericFocus, 0);
       model.set(GRB_IntParam_Crossover, 1);
 
       int Imax = s_;
