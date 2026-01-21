@@ -5,6 +5,8 @@ from gurobipy import GRB
 import random
 import time
 import os
+from collections import defaultdict, deque
+
 
 Pair = Tuple[int, int, int]
 Topology = Dict[Tuple[int, int], int]
@@ -43,57 +45,49 @@ class DPScheduler:
         self.rd = rd
         self._cache: Dict[Tuple[int, int], Tuple[Topology, float]] = {}
 
-        model = gp.Model()
-        model.Params.OutputFlag = self.logging
-        # model.Params.MIPFocus = 1
-        # model.Params.Heuristics = 0.5
-        # model.Params.Cuts = 1
-        # model.Params.NonConvex = 2
-        # model.Params.MIPGap = 0.05
+        # model = gp.Model()
+        # model.Params.OutputFlag = self.logging
+        # # model.Params.MIPFocus = 1
+        # # model.Params.Heuristics = 0.5
+        # # model.Params.Cuts = 1
+        # # model.Params.NonConvex = 2
+        # # model.Params.MIPGap = 0.05
 
-        # model.Params.PoolSearchMode = 2
-        # model.Params.PoolSolutions = 10
-        # model.Params.PoolGap = 1e10
-        model.Params.Threads = os.cpu_count()
-        model.Params.Method = 2
-        model.Params.BarHomogeneous = 1
-        model.Params.NumericFocus = 3
-        model.Params.Crossover = 1
-        # model.Params.TimeLimit = 2
-        # model.Params.Presolve = 2
+        # # model.Params.PoolSearchMode = 2
+        # # model.Params.PoolSolutions = 10
+        # # model.Params.PoolGap = 1e10
+        # model.Params.Threads = os.cpu_count()
+        # model.Params.Method = 2
+        # model.Params.BarHomogeneous = 1
+        # model.Params.NumericFocus = 3
+        # model.Params.Crossover = 1
+        # # model.Params.TimeLimit = 2
+        # # model.Params.Presolve = 2
 
-        I = list(range(self.s+1))
+        # I = list(range(self.s+1))
 
-        # Concurrent flow theta variable
-        # Lets give an epsilon for the lb, so that the inverse doesn't go to infinity
-        theta = model.addVars(I,lb=0,ub=1,name="theta")
-        # auxiliary variable corresponding to the transmission time
-        T = model.addVars(I,lb=0,ub=100,name="T") # Limiting to some value for the transmission delay
+        # # Concurrent flow theta variable
+        # # Lets give an epsilon for the lb, so that the inverse doesn't go to infinity
+        # theta = model.addVars(I,lb=0,ub=1,name="theta")
+        # # auxiliary variable corresponding to the transmission time
+        # T = model.addVars(I,lb=0,ub=4,name="T") # Limiting to some value for the transmission delay
+
         # flow variable for ith step, for demand s,t, traversing edge u,v
-        flow_index = []
-        for i in range(1,self.s+1):
-            if self.logging:
-                print("adding flow indices", i)
-            for (s, t, _) in self.steps[i-1]:
-                for u in range(self.n):
-                    for v in range(self.n):
-                        if u != v:
-                            flow_index.append((i, s, t, u, v))
 
         # print(flow_index.index((15,0,15,0,1)))
         # exit()
 
-        if self.logging:
-            print("adding flow vars")
-        f = model.addVars(flow_index,lb=0,ub=self.d,name="f")
-        if self.logging:
-            print("finished adding flow vars")
+        # if self.logging:
+        #     print("adding flow vars")
+
+        # if self.logging:
+        #     print("finished adding flow vars")
 
 
-        self.model = model
-        self.T = T
-        self.theta = theta
-        self.f = f
+        # self.model = model
+        # self.T = T
+        # self.theta = theta
+        # self.f = f
 
     def ringNext(self,u, n):
         return (u + 1) % n
@@ -137,6 +131,27 @@ class DPScheduler:
                 else:
                     base[(u, v)] = 0
         return base
+    def checkReachable(self, adj, bySource, n):
+        visited = [False]*n
+        q = deque()
+        for s, targets in bySource.items():
+            for i in range(n):
+                visited[i] = False
+            q.clear()
+            visited[s] = True
+            q.append(s)
+            while q:
+                u = q.popleft()
+                for v in adj[u]:
+                    if not visited[v]:
+                        visited[v] = True
+                        q.append(v)
+            for t in targets:
+                if not visited[t]:
+                    return False
+
+        return True
+
 
     def completion_time(self, a: int, b: int) -> Tuple[Topology, float]:
         key = (a, b)
@@ -212,9 +227,9 @@ class DPScheduler:
                 # print()
                 topoSpace = topoSpace + 1
 
-        if self.logging == 1:
-            print(f'\n\n\n\n##### Solving for steps a={a}, b={b} #####')
-            print("total = ", topoSpace)
+        # if self.logging == 1:
+        print(f'\n\n\n\n##### Solving for steps a={a}, b={b} #####')
+        print("total = ", topoSpace)
 
         # ToDo: Could add other relevant topos to the topoSpace
 
@@ -223,55 +238,143 @@ class DPScheduler:
         #         for d in range(self.n):
         #             y[i][u,(u+d)%n] = 1
 
-        model = self.model
-        T = self.T
-        theta = self.theta
-        f = self.f
+        # model = self.model
+        # T = self.T
+        # theta = self.theta
+        # f = self.f
 
         objectiveValue = list()
         for search in range(topoSpace):
             tsprime = time.perf_counter_ns()
-            model.remove(model.getConstrs())
-            model.update()
+            t1 = time.perf_counter_ns()
+            model = gp.Model()
+            model.Params.OutputFlag = self.logging
+            # model.Params.MIPFocus = 1
+            # model.Params.Heuristics = 0.5
+            # model.Params.Cuts = 1
+            # model.Params.NonConvex = 2
+            # model.Params.MIPGap = 0.05
+
+            # model.Params.PoolSearchMode = 2
+            # model.Params.PoolSolutions = 10
+            # model.Params.PoolGap = 1e10
+            model.Params.Threads = os.cpu_count()
+            model.Params.Method = 2
+            model.Params.BarHomogeneous = 1
+            model.Params.NumericFocus = 3
+            model.Params.Crossover = 1
+            # model.Params.TimeLimit = 2
+            # model.Params.Presolve = 2
+
+            I = list(range(self.s+1))
+
+            # Concurrent flow theta variable
+            # Lets give an epsilon for the lb, so that the inverse doesn't go to infinity
+            theta = model.addVars(I,lb=0,ub=1,name="theta")
+            # auxiliary variable corresponding to the transmission time
+            T = model.addVars(I,lb=0,ub=4,name="T") # Limiting to some value for the transmission delay
+            # model.remove(model.getConstrs())
+            # print("model clear", (time.perf_counter_ns()-t1)/1e9)
+            # model.update()
             
             x = y[search]
+            edges = [(u,v) for (u,v),cap in x.items() if cap > 0 and u != v]
+            outN = [[] for _ in range(self.n)]
+            inN  = [[] for _ in range(self.n)]
+            for (u,v) in edges:
+                outN[u].append(v)
+                inN[v].append(u)
 
+            active = {u for u in range(self.n) if outN[u] or inN[u]}
+
+            adj = [[] for _ in range(self.n)]
+            for (u,v), cap in x.items():
+                if cap > 0 and u != v:
+                    adj[u].append(v)
+            demands = set()
+            for i in range(a, b+1):
+                for (s,t,_) in self.steps[i-1]:
+                    demands.add((s,t))
+            bySource = defaultdict(set)
+            for (s,t) in demands:
+                bySource[s].add(t)
+
+            if not self.checkReachable(adj, bySource, self.n):
+                continue
+
+            flow_index = []
+            for i in range(a, b+1):
+                for (s,t,_) in self.steps[i-1]:
+                    flow_index.extend((i, s, t, u, v) for (u,v) in edges)
+            f = model.addVars(flow_index, lb=0, ub=self.d, name="f")
+
+
+            t1 = time.perf_counter_ns()
             # Flow conservation and demand constraints
-            for i in range(a, b + 1): # For each step between a, b (including)
-                for (s, t, demand) in self.steps[i - 1]: # Note: Algorithm's steps are indexed from 1
-                    for u in range(self.n):
-                        outflow = gp.quicksum(f[i, s, t, u, v] for v in range(self.n) if u != v)
-                        inflow = gp.quicksum(f[i, s, t, v, u] for v in range(self.n) if u != v)
-                        if u == s:
-                            model.addConstr(outflow - inflow == theta[i]*int(demand/self.chunksizes[i-1]))
-                        elif u == t:
-                            model.addConstr(outflow - inflow == -theta[i]*int(demand/self.chunksizes[i-1]))
-                        else:
-                            model.addConstr(outflow - inflow == 0)
+            # for i in range(a, b + 1): # For each step between a, b (including)
+            #     for (s, t, demand) in self.steps[i - 1]: # Note: Algorithm's steps are indexed from 1
+            #         for u in range(self.n):
+            #             outflow = gp.quicksum(f[i, s, t, u, v] for v in outN[u])
+            #             inflow = gp.quicksum(f[i, s, t, v, u] for v in inN[u])
+            #             if u == s:
+            #                 model.addConstr(outflow - inflow == theta[i]*int(demand/self.chunksizes[i-1]))
+            #             elif u == t:
+            #                 model.addConstr(outflow - inflow == -theta[i]*int(demand/self.chunksizes[i-1]))
+            #             else:
+            #                 model.addConstr(outflow - inflow == 0)
+            for i in range(a,b+1):
+                inv = 1.0 / self.chunksizes[i-1]
+                for (s,t,demand) in self.steps[i-1]:
+                    dint = int(demand * inv)
+                    nodes = active | {s,t}
+                    for u in nodes:
+                        outflow = gp.quicksum(f[i,s,t,u,v] for v in outN[u])
+                        inflow  = gp.quicksum(f[i,s,t,v,u] for v in inN[u])
+                        rhs = 0
+                        if u==s:
+                            rhs = theta[i]*dint
+                        elif u==t:
+                            rhs = -theta[i]*dint
 
+                        model.addConstr(outflow - inflow == rhs)
+
+            # print("flowconstrs", (time.perf_counter_ns()-t1)/1e9)
+
+            t1 = time.perf_counter_ns()
             # Capacity constraints
             for i in range(a, b + 1):
                 for u in range(self.n):
                     for v in range(self.n):
                         if u != v:
-                            model.addConstr(
-                                gp.quicksum(f[i, s, t, u, v] for (s, t, _) in self.steps[i - 1])
-                                <= x[u, v]
-                            )
+                            if (x[u, v]>0):
+                                model.addConstr(
+                                    gp.quicksum(f[i, s, t, u, v] for (s, t, _) in self.steps[i - 1])
+                                    <= x[u, v]
+                                )
+
+            # print("capconstrs", (time.perf_counter_ns()-t1)/1e9)
 
             for i in range(a, b + 1):
                 # We assume that m_i is same across all nodes within a single step,
                 # even in multi-port case i.e., same size sent on all ports
                 _bits = self.chunksizes[i-1]
-                model.addQConstr(theta[i] * (T[i]*1e9) == self.beta * _bits)
+                # model.addQConstr(theta[i] * (T[i]*1e9) == self.beta * _bits)
                 # converting to soc constraint, see appendix
-                # model.addQConstr((theta[i] - T[i]) * (theta[i] - T[i])+ 4.0 * self.beta * _bits<= (theta[i] + T[i]) * (theta[i] + T[i]))
+                model.addQConstr((theta[i] - T[i]*1e6) * (theta[i] - T[i]*1e6)+ 4.0 * self.beta * _bits<= (theta[i] + T[i]*1e6) * (theta[i] + T[i]*1e6))
+                # model.addQConstr(2 * theta[i] * T[i] >= 1)
+
 
             if self.relaxation == 1:
-                model.setObjective(gp.quicksum(self.alpha+T[i]*1e9*(1+ self.delta/(self.beta * self.chunksizes[i-1])) for i in range(a, b + 1)), GRB.MINIMIZE)
+                model.setObjective(gp.quicksum(self.alpha+T[i]*1e6*(1+ self.delta/(self.beta * self.chunksizes[i-1])) for i in range(a, b + 1)), GRB.MINIMIZE)
+                # model.setObjective(gp.quicksum(self.alpha + (self.beta * self.chunksizes[i-1] + self.delta)*1e9 * T[i] for i in range(a, b+1)), GRB.MINIMIZE)
             else:
-                model.setObjective(gp.quicksum(self.alpha+T[i]*1e9*(1+ self.delta/(self.beta * self.chunksizes[i-1])) for i in range(a, b + 1)), GRB.MINIMIZE)
+                model.setObjective(gp.quicksum(self.alpha+T[i]*1e6*(1+ self.delta/(self.beta * self.chunksizes[i-1])) for i in range(a, b + 1)), GRB.MINIMIZE)
+                # model.setObjective(gp.quicksum(self.alpha + (self.beta * self.chunksizes[i-1] + self.delta)*1e9 * T[i] for i in range(a, b+1)), GRB.MINIMIZE)
+
+            t1 = time.perf_counter_ns()
             model.optimize()
+            # print("optimize", (time.perf_counter_ns()-t1)/1e9)
+
             if model.Status != GRB.OPTIMAL:
                 cost = math.inf
                 # print(model.Status)
@@ -281,8 +384,8 @@ class DPScheduler:
                 cost = model.ObjVal
                 objectiveValue.append(cost)
             
-            if self.logging:
-                print("instanceTime =",(time.perf_counter_ns()-tsprime)/1e9, cost)
+            # if self.logging:
+            print("instanceTime =",(time.perf_counter_ns()-tsprime)/1e9, cost)
 
         minIndex, minObj = min(enumerate(objectiveValue), key=lambda lam: lam[1])
         # print(minIndex, minObj)
