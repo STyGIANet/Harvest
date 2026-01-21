@@ -34,7 +34,7 @@ MESSAGE_NAMES=(1KB 4KB 16KB 64KB 256KB 1MB 4MB 16MB \
 64MB 256MB 1GB)
 
 LOGGING=$2
-RELAXATION=1
+RELAXATION=0
 #####################################################################################################
 # What changes in the collective file: Message size, Number of nodes, Ports (or dimensions)
 # Alpha, and other parameters are input to the topology synthesis, not for the collective itself
@@ -94,6 +94,7 @@ for N in ${NODES[@]};do
 							echo "synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE"
 							time (./synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE; echo "################################"; echo $OUTFILE; echo "############################") &
 							# exit
+							sleep 0.5
 						done
 					done
 				done
