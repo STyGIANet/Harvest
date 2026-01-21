@@ -57,9 +57,14 @@ DELTAS=(10000 10 100 10000)
 ############# 1D AllGather #############
 
 # NODES=(4 8 16 32 64 128)
-NODES=(8 16 64)
+NODES=(8 16 32 64)
 PORTS=(2)
 ALGS=(all-to-all all-gather-rd-nd all-gather-swing-nd)
+
+RD=0
+
+cd $SCRIPT_DIR
+./buildCpp.sh
 
 echo "Generating 1D AllGather"
 NUM_EXPS=0
@@ -71,18 +76,24 @@ for N in ${NODES[@]};do
 			for ALPHA_R in ${ALPHARS[@]};do
 				for P in ${PORTS[@]};do
 					for ALG in ${ALGS[@]};do
+						if [[ $ALG == "all-gather-rd-nd" ]];then
+							RD=0
+						else
+							RD=1
+						fi
 						for IDX in ${!MESSAGE_SIZES[@]};do
 							MESSAGE_SIZE=${MESSAGE_SIZES[$IDX]}
 							MESSAGE_NAME=${MESSAGE_NAMES[$IDX]}
 							COLLECTIVE_FILE=$COLL_DIR/collective-$ALG-$N-$P-$MESSAGE_NAME.json
 							OUTFILE=$TOPO_DIR/topology-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.json
 							NUM_EXPS=$(( $NUM_EXPS + 1 ))
-							while [[ $(ps aux | grep synthesize-schedule.py | wc -l) -gt $NUM_PARALLEL ]];do
+							while [[ $(ps aux | grep synthesize-schedule | wc -l) -gt $NUM_PARALLEL ]];do
 								sleep 2
 								echo "waiting at $NUM_EXPS..."
 							done
-							echo "python synthesize-schedule.py $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $OUTFILE"
-							time (python synthesize-schedule.py $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $OUTFILE; echo "################################"; echo $OUTFILE; echo "############################") &
+							echo "synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE"
+							time (./synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE; echo "################################"; echo $OUTFILE; echo "############################") &
+							# exit
 						done
 					done
 				done

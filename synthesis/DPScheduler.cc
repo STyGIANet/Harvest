@@ -215,8 +215,10 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
     }
   }
 
-  std::cout << "\n\n\n\n##### Solving for steps a=" << a << ", b=" << b << " #####\n";
-  std::cout << "total = " << topoSpace << "\n";
+  if (logging_){
+    std::cout << "\n\n\n\n##### Solving for steps a=" << a << ", b=" << b << " #####\n";
+    std::cout << "total = " << topoSpace << "\n";
+  }
 
   std::vector<double> objectiveValue((size_t)topoSpace, INF_D);
 
@@ -387,7 +389,9 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
 
       model.optimize();
       auto t1 = std::chrono::steady_clock::now();
-      std::cout << "Done in " << std::chrono::duration<double>(t1 - t0).count() << " cost " << model.get(GRB_DoubleAttr_ObjVal) << std::endl;
+      if (logging_){
+        std::cout << "Done in " << std::chrono::duration<double>(t1 - t0).count() << " cost " << model.get(GRB_DoubleAttr_ObjVal) << std::endl;
+      }
 
       int status = model.get(GRB_IntAttr_Status);
       if (status != GRB_OPTIMAL) {
@@ -497,7 +501,9 @@ std::pair<double, std::vector<std::pair<Topology,int>>> DPScheduler::synthesize(
   std::vector<std::pair<Topology,int>> best_schedule;
 
   for (int k = 0; k <= s_; ++k) {
-    std::cout << "###### Solving for " << k << " reconfigurations\n";
+    if (logging_){
+      std::cout << "###### Solving for " << k << " reconfigurations\n";
+    }
     auto [cost_no_reconf, sched] = synthesize_for_k(k);
     double total_cost = cost_no_reconf + (double)k * alpha_r_;
     if (total_cost < best_cost) {
