@@ -282,7 +282,8 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
       GRBModel model = GRBModel(env);
 
       model.set(GRB_IntParam_OutputFlag, logging_);
-      model.set(GRB_IntParam_Threads, (int)std::max(1u, std::thread::hardware_concurrency()));
+      // model.set(GRB_IntParam_Threads, (int)std::max(1u, std::thread::hardware_concurrency()));
+      model.set(GRB_IntParam_Threads, 4);
       model.set(GRB_IntParam_Method, 2);
       model.set(GRB_IntParam_BarHomogeneous, 1);
       model.set(GRB_IntParam_NumericFocus, 3);
