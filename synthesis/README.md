@@ -18,6 +18,12 @@ uv pip install --upgrade pip
 uv pip install -r requirements.txt
 ```
 
+The c++ version requires json package installed:
+
+```
+sudo apt install nlohmann-json3-dev
+```
+
 # Generate collectives
 
 Many collectives can be generated in one-shot using `$ ./generate-collectives.sh`.
