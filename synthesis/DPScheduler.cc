@@ -318,6 +318,7 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
         }
       }
 
+      auto tf1 = std::chrono::steady_clock::now();
       // Flow conservation constraints
       for (int i = a; i <= b; ++i) {
         double inv = 1.0 / (double)chunksizes_[(size_t)i - 1];
@@ -349,12 +350,18 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
             }
 
             GRBLinExpr rhs = 0.0;
-            if (u == s) rhs = theta[(size_t)i] * (double)dint;
-            else if (u == t) rhs = -theta[(size_t)i] * (double)dint;
+            if (u == s)
+              continue;
+              // rhs = theta[(size_t)i] * (double)dint;
+            else if (u == t) 
+              rhs = -theta[(size_t)i] * (double)dint;
 
-            model.addConstr(out - in == rhs);
+            model.addConstr(out - in <= rhs);
           }
         }
+      }
+      if (logging_){
+        std::cout << "Flow constraints done in " << std::chrono::duration<double>(std::chrono::steady_clock::now() - tf1).count() << " seconds\n";
       }
 
       // Capacity constraints
@@ -392,7 +399,11 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
       }
       model.setObjective(obj, GRB_MINIMIZE);
 
+      auto ts1 = std::chrono::steady_clock::now();
       model.optimize();
+      if (logging_){
+        std::cout << "Solved in " << std::chrono::duration<double>(std::chrono::steady_clock::now() - ts1).count() << " seconds\n";
+      }
       auto t1 = std::chrono::steady_clock::now();
       if (logging_){
         std::cout << "Done in " << std::chrono::duration<double>(t1 - t0).count() << " cost " << model.get(GRB_DoubleAttr_ObjVal) << std::endl;
