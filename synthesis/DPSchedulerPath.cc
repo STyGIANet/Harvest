@@ -435,7 +435,7 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
 
       GRBModel model = GRBModel(env);
 
-      model.set(GRB_IntParam_Threads, 2);
+      model.set(GRB_IntParam_Threads, 1);
       model.set(GRB_IntParam_Method, 2);
       model.set(GRB_IntParam_Presolve, 2);
       model.set(GRB_IntParam_BarHomogeneous, 0);
