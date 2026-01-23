@@ -68,43 +68,44 @@ cd $SCRIPT_DIR
 
 echo "Generating 1D AllGather"
 NUM_EXPS=0
-# for N in ${NODES[@]};do
-# 	for BANDWIDTH in ${BANDWIDTHS[@]};do
-# 		for ALPHA_DELTA_ID in ${!ALPHAS[@]};do
-# 			ALPHA=${ALPHAS[$ALPHA_DELTA_ID]}
-# 			DELTA=${DELTAS[$ALPHA_DELTA_ID]}
-# 			for ALPHA_R in ${ALPHARS[@]};do
-# 				for P in ${PORTS[@]};do
-# 					for ALG in ${ALGS[@]};do
-# 						if [[ $ALG == "all-gather-rd-nd" ]];then
-# 							RD=1
-# 						else
-# 							RD=0
-# 						fi
-# 						for IDX in ${!MESSAGE_SIZES[@]};do
-# 							MESSAGE_SIZE=${MESSAGE_SIZES[$IDX]}
-# 							MESSAGE_NAME=${MESSAGE_NAMES[$IDX]}
-# 							COLLECTIVE_FILE=$COLL_DIR/collective-$ALG-$N-$P-$MESSAGE_NAME.json
-# 							OUTFILE=$TOPO_DIR/topology-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.json
-# 							NUM_EXPS=$(( $NUM_EXPS + 1 ))
-# 							while [[ $(ps aux | grep '/bin/bash ./synthesize-schedule' | wc -l) -gt $NUM_PARALLEL ]];do
-# 								sleep 2
-# 								echo "waiting at $NUM_EXPS..."
-# 							done
-# 							echo "synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE"
-# 							time (./synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE; echo "################################"; echo $OUTFILE; echo "############################") &
-# 							# exit
-# 							sleep 0.5
-# 						done
-# 					done
-# 				done
-# 			done
-# 		done
-# 	done
-# done
+for N in ${NODES[@]};do
+	for BANDWIDTH in ${BANDWIDTHS[@]};do
+		for ALPHA_DELTA_ID in ${!ALPHAS[@]};do
+			ALPHA=${ALPHAS[$ALPHA_DELTA_ID]}
+			DELTA=${DELTAS[$ALPHA_DELTA_ID]}
+			for ALPHA_R in ${ALPHARS[@]};do
+				for P in ${PORTS[@]};do
+					for ALG in ${ALGS[@]};do
+						if [[ $ALG == "all-gather-rd-nd" ]];then
+							RD=1
+						else
+							RD=0
+						fi
+						for IDX in ${!MESSAGE_SIZES[@]};do
+							MESSAGE_SIZE=${MESSAGE_SIZES[$IDX]}
+							MESSAGE_NAME=${MESSAGE_NAMES[$IDX]}
+							COLLECTIVE_FILE=$COLL_DIR/collective-$ALG-$N-$P-$MESSAGE_NAME.json
+							OUTFILE=$TOPO_DIR/topology-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.json
+							NUM_EXPS=$(( $NUM_EXPS + 1 ))
+							while [[ $(ps aux | grep '/bin/bash ./synthesize-schedule' | wc -l) -gt $NUM_PARALLEL ]];do
+								sleep 2
+								echo "waiting at $NUM_EXPS..."
+							done
+							echo "synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE"
+							time (./synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE; echo "################################"; echo $OUTFILE; echo "############################") &
+							# exit
+							# sleep 0.5
+						done
+					done
+				done
+			done
+		done
+	done
+done
 
 PORTS=(1)
 NODES=(64 32 8 16)
+# NODES=(64)
 ALGS=(all-to-all)
 for N in ${NODES[@]};do
 	for BANDWIDTH in ${BANDWIDTHS[@]};do
@@ -130,9 +131,9 @@ for N in ${NODES[@]};do
 								echo "waiting at $NUM_EXPS..."
 							done
 							echo "synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE"
-							time (./synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE; echo "################################"; echo $OUTFILE; echo "############################")
-							exit
-							sleep 0.5
+							time (./synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE; echo "################################"; echo $OUTFILE; echo "############################") &
+							# exit
+							# sleep 0.5
 						done
 					done
 				done
