@@ -553,21 +553,23 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
       GRBLinExpr obj = 0.0;
       for (int i = a; i <= b; ++i) {
         double bits = (double)chunksizes_[(size_t)i - 1];
-        if (SCALE == 1)
-          obj += alpha_ + T[(size_t)i] * (1.0 + (delta_ / (beta_ * bits)));
-        else
-          obj += alpha_*SCALE + T[(size_t)i] + delta_ * ( T[(size_t)i] / (beta_ * bits));
-        // Everything is converted to nanoseconds here.
+        // if (SCALE == 1)
+        //   // Everything is nanoseconds here
+        //   obj += alpha_ + T[(size_t)i] * (1.0 + (delta_ / (beta_ * bits)));
+        // else{
+          // Everything is converted to seconds here.
+          // obj += alpha_*SCALE + T[(size_t)i] + delta_ * ( T[(size_t)i] / (beta_ * bits));
+        // }
+        // Since scale is 1 anyway otherwise, getting rid of if else
+        // T[(size_t)i] / (beta_ * bits) this term is theta and unitless
+        obj += alpha_*SCALE + T[(size_t)i] + delta_*SCALE * ( T[(size_t)i] / (beta_ * bits));
       }
       model.setObjective(obj, GRB_MINIMIZE);
 
       model.optimize();
 
       auto t1 = std::chrono::steady_clock::now();
-      if (SCALE==1)
-        std::cout << "Done in " << std::chrono::duration<double>(t1 - t0).count() << " cost " << uint32_t (model.get(GRB_DoubleAttr_ObjVal)) << std::endl;
-      else
-        std::cout << "Done in " << std::chrono::duration<double>(t1 - t0).count() << " costScale " << uint32_t (model.get(GRB_DoubleAttr_ObjVal)/SCALE) << std::endl;
+      std::cout << "Done in " << std::chrono::duration<double>(t1 - t0).count() << " cost " << uint32_t (model.get(GRB_DoubleAttr_ObjVal)/SCALE) << std::endl;
 
       if (logging_) {
         std::cout << "Status " << model.get(GRB_IntAttr_Status) << "\n";
@@ -580,7 +582,7 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
       if (status != GRB_OPTIMAL && status != GRB_SUBOPTIMAL) {
         objectiveValue[(size_t)search] = INF_D;
       } else {
-        objectiveValue[(size_t)search] = model.get(GRB_DoubleAttr_ObjVal);
+        objectiveValue[(size_t)search] = model.get(GRB_DoubleAttr_ObjVal)/SCALE;
       }
 
     } catch (GRBException& e) {
