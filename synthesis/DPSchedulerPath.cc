@@ -14,7 +14,6 @@ static constexpr double INF_D = std::numeric_limits<double>::infinity();
 
 static constexpr int K_PATHS = 8;
 static constexpr int MAX_PATH_LEN = 64; // It is a bit extreme but fine for now..
-static constexpr double SCALE = 1e-9;
 
 DPScheduler::DPScheduler(
   const std::vector<std::vector<Demand>>& steps,
@@ -527,13 +526,24 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
         }
       }
 
+      // Ti is basically transmission time. So lets interpret it in nanosecond, or in seconds based on our convinience
+      double SCALE = 1; // Makes Ti in nanoseconds
+      for (int i = a; i <= b; ++i) {
+        double bits = (double)chunksizes_[(size_t)i - 1];
+        if (beta_ * bits > 1e3){
+          SCALE = 1e-9; // Makes Ti in seconds
+        }
+      }
+
       for (int i = a; i <= b; ++i) {
         double bits = (double)chunksizes_[(size_t)i - 1];
         // model.addQConstr(2 * theta[(size_t)i] * T[(size_t)i] == 2 * beta_ * bits);
         GRBVar th = theta[(size_t)i];
         GRBVar Ti = T[(size_t)i];
 
-        GRBQuadExpr lhs = (th - Ti) * (th - Ti) + 4.0 * beta_ * bits;
+        // Ti is basically transmission time. So lets interpret it in nanosecond, or in seconds based on our convinience
+
+        GRBQuadExpr lhs = (th - Ti) * (th - Ti) + 4.0 * beta_ * bits * SCALE;
         GRBQuadExpr rhs = (th + Ti) * (th + Ti);
         // The inequality here speeds up the optimizer, but even with exact same objective value, it flips to suboptimal status somehow.
         // Definitely looks like a numeric issue and suboptimality could perhaps just be a floating point difference
@@ -543,14 +553,21 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
       GRBLinExpr obj = 0.0;
       for (int i = a; i <= b; ++i) {
         double bits = (double)chunksizes_[(size_t)i - 1];
-        obj += alpha_ + T[(size_t)i] * (1.0 + (delta_ / (beta_ * bits)));
+        if (SCALE == 1)
+          obj += alpha_ + T[(size_t)i] * (1.0 + (delta_ / (beta_ * bits)));
+        else
+          obj += alpha_*SCALE + T[(size_t)i] + delta_ * ( T[(size_t)i] / (beta_ * bits));
+        // Everything is converted to nanoseconds here.
       }
       model.setObjective(obj, GRB_MINIMIZE);
 
       model.optimize();
 
       auto t1 = std::chrono::steady_clock::now();
-      std::cout << "Done in " << std::chrono::duration<double>(t1 - t0).count() << " cost " << double (model.get(GRB_DoubleAttr_ObjVal)) << std::endl;
+      if (SCALE==1)
+        std::cout << "Done in " << std::chrono::duration<double>(t1 - t0).count() << " cost " << uint32_t (model.get(GRB_DoubleAttr_ObjVal)) << std::endl;
+      else
+        std::cout << "Done in " << std::chrono::duration<double>(t1 - t0).count() << " costScale " << uint32_t (model.get(GRB_DoubleAttr_ObjVal)/SCALE) << std::endl;
 
       if (logging_) {
         std::cout << "Status " << model.get(GRB_IntAttr_Status) << "\n";
