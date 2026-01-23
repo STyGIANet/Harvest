@@ -104,6 +104,7 @@ NUM_EXPS=0
 # done
 
 PORTS=(1)
+NODES=(64 32 8 16)
 ALGS=(all-to-all)
 for N in ${NODES[@]};do
 	for BANDWIDTH in ${BANDWIDTHS[@]};do
@@ -129,8 +130,8 @@ for N in ${NODES[@]};do
 								echo "waiting at $NUM_EXPS..."
 							done
 							echo "synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE"
-							time (./synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE; echo "################################"; echo $OUTFILE; echo "############################") &
-							# exit
+							time (./synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE; echo "################################"; echo $OUTFILE; echo "############################")
+							exit
 							sleep 0.5
 						done
 					done

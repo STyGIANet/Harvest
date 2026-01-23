@@ -259,6 +259,7 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
       // No need to solve, we know it will be an infeasible solution
       continue;
     }
+    // std::cout << "searchIndex " << search << std::endl;
 
     // in and out neighbours, helpful for flow conservation constraints
     std::vector<std::vector<int>> outN((size_t)n_), inN((size_t)n_);
@@ -282,8 +283,9 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
       env.start();
 
       GRBModel model = GRBModel(env);
+      // GRBModel model(*env_);
 
-      model.set(GRB_IntParam_OutputFlag, logging_);
+      // model.set(GRB_IntParam_OutputFlag, logging_);
       // model.set(GRB_IntParam_Threads, (int)std::max(1u, std::thread::hardware_concurrency()));
       model.set(GRB_IntParam_Threads, 2);
       model.set(GRB_IntParam_Method, 2);
@@ -300,7 +302,7 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
 
       for (int i = 0; i <= Imax; ++i) {
         theta[(size_t)i] = model.addVar(0.01, 1.0, 0.0, GRB_CONTINUOUS, "theta_" + std::to_string(i));
-        T[(size_t)i]     = model.addVar(0.01, 2, 0.0, GRB_CONTINUOUS, "T_" + std::to_string(i));
+        T[(size_t)i]     = model.addVar(1e-12, 2, 0.0, GRB_CONTINUOUS, "T_" + std::to_string(i));
       }
 
       // Build flow vars only for (i,s,t,u,v) where edge exists
@@ -335,6 +337,8 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
           if (!activeFlag[(size_t)t] && t != s) nodes.push_back(t);
 
           for (int u : nodes) {
+            if (u == s)
+              continue;
             GRBLinExpr out = 0.0;
             GRBLinExpr in = 0.0;
 
@@ -350,10 +354,8 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
             }
 
             GRBLinExpr rhs = 0.0;
-            if (u == s)
-              continue;
               // rhs = theta[(size_t)i] * (double)dint;
-            else if (u == t) 
+            if (u == t) 
               rhs = -theta[(size_t)i] * (double)dint;
 
             model.addConstr(out - in <= rhs);
@@ -405,8 +407,8 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
         std::cout << "Solved in " << std::chrono::duration<double>(std::chrono::steady_clock::now() - ts1).count() << " seconds\n";
       }
       auto t1 = std::chrono::steady_clock::now();
+      std::cout << "Done in " << std::chrono::duration<double>(t1 - t0).count() << " cost " << model.get(GRB_DoubleAttr_ObjVal) << std::endl;
       if (logging_){
-        std::cout << "Done in " << std::chrono::duration<double>(t1 - t0).count() << " cost " << model.get(GRB_DoubleAttr_ObjVal) << std::endl;
         std::cout << "Status " << model.get(GRB_IntAttr_Status) << "\n";
         std::cout << "ObjVal " << model.get(GRB_DoubleAttr_ObjVal) << "\n";
         std::cout << "IterCount " << model.get(GRB_DoubleAttr_IterCount) << "\n";
