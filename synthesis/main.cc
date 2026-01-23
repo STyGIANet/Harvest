@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <regex>
 
 using json = nlohmann::json;
 
@@ -65,12 +66,22 @@ int main(int argc, char* argv[]) {
     relaxation, logging, rd
   );
 
-  auto [cost, schedule] = scheduler.synthesize();
-  auto stepTopos = scheduler.expandSchedulePerStep(schedule, (int)steps.size());
-
+  SchedulerResult res = scheduler.synthesize();
+  auto total_reconf_cost = res.reconf_cost;
+  auto k = res.k;
+  auto stepTopos = scheduler.expandSchedulePerStep(res.schedule, (int)steps.size());
+  std::regex re(R"(collective-(.+?)(?=-\d))");
+  std::smatch match;
+  std::regex_search(in_file, match, re);
+  
   json out;
-  out["total_cost"] = cost;
+  out["cost"] = res.cost;
+  out["num_of_reconfigs"] = k;
+  out["alpha_r"] = alpha_r;
+  out["collective"] = match[1];
+  out["reconf_cost_total"] = total_reconf_cost;
   out["steps"] = json::array();
+
 
   for (int i = 0; i < (int)stepTopos.size(); ++i) {
     json entry;

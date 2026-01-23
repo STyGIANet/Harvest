@@ -518,9 +518,12 @@ std::pair<double, std::vector<std::pair<Topology,int>>> DPScheduler::synthesize_
   return {DP[1][k], schedule};
 }
 
-std::pair<double, std::vector<std::pair<Topology,int>>> DPScheduler::synthesize() {
+SchedulerResult DPScheduler::synthesize() {
   double best_cost = INF_D;
   std::vector<std::pair<Topology,int>> best_schedule;
+  double best_total_reconf_cost = INF_D;
+  int best_k = 0;
+
 
   for (int k = 0; k <= s_; ++k) {
     if (logging_){
@@ -531,10 +534,14 @@ std::pair<double, std::vector<std::pair<Topology,int>>> DPScheduler::synthesize(
     if (total_cost < best_cost) {
       best_cost = total_cost;
       best_schedule = std::move(sched);
+      best_total_reconf_cost = (double)k * alpha_r_;
+      best_k = k;
+      std::cout <<  "k: " << k << " total_cost without reconfig: " 
+        << total_cost << "total reconf cost: "<< best_total_reconf_cost;
     }
   }
 
-  return {best_cost, best_schedule};
+  return {best_cost, best_schedule, best_total_reconf_cost, best_k};
 }
 
 std::vector<Topology> DPScheduler::expandSchedulePerStep(

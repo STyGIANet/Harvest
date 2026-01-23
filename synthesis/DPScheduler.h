@@ -27,6 +27,13 @@ struct EdgeHash {
 
 using Topology = std::unordered_map<Edge, int, EdgeHash>;
 
+struct SchedulerResult {
+    double cost;
+    std::vector<std::pair<Topology, int>> schedule;
+    double reconf_cost;
+    int k;
+};
+
 struct PairHash {
   size_t operator()(const std::pair<int,int>& p) const noexcept {
     return (static_cast<size_t>(p.first) << 32) ^ static_cast<size_t>(p.second);
@@ -74,7 +81,7 @@ public:
     int rd
   );
 
-  std::pair<double, std::vector<std::pair<Topology,int>>> synthesize();
+  SchedulerResult synthesize();
   std::pair<double, std::vector<std::pair<Topology,int>>> synthesize_for_k(int k);
 
   std::vector<Topology> expandSchedulePerStep(
