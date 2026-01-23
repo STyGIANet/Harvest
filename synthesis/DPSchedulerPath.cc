@@ -678,8 +678,10 @@ SchedulerResult DPScheduler::synthesize() {
       best_schedule = std::move(sched);
       best_total_reconf_cost = (double)k * alpha_r_;
       best_k = k;
-      std::cout << "k: " << k << " total_cost: " << total_cost
+      if (logging_){
+        std::cout << "k: " << k << " total_cost: " << total_cost
                 << " total reconf cost: " << best_total_reconf_cost << "\n";
+      }
     }
   }
 
