@@ -287,10 +287,10 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
       // model.set(GRB_IntParam_Threads, (int)std::max(1u, std::thread::hardware_concurrency()));
       model.set(GRB_IntParam_Threads, 2);
       model.set(GRB_IntParam_Method, 2);
-      // model.set(GRB_IntParam_Presolve, 2);
-      // model.set(GRB_IntParam_BarHomogeneous, 0);
-      // model.set(GRB_DoubleParam_BarConvTol, 1e-7);
-      // model.set(GRB_IntParam_NumericFocus, 0);
+      model.set(GRB_IntParam_Presolve, 2);
+      model.set(GRB_IntParam_BarHomogeneous, 0);
+      model.set(GRB_DoubleParam_BarConvTol, 1e-6);
+      model.set(GRB_IntParam_NumericFocus, 0);
       model.set(GRB_IntParam_Crossover, 0);
 
 
@@ -299,8 +299,8 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
       std::vector<GRBVar> T((size_t)Imax + 1);
 
       for (int i = 0; i <= Imax; ++i) {
-        theta[(size_t)i] = model.addVar(0, 1.0, 0.0, GRB_CONTINUOUS, "theta_" + std::to_string(i));
-        T[(size_t)i]     = model.addVar(0.0, 2, 0.0, GRB_CONTINUOUS, "T_" + std::to_string(i));
+        theta[(size_t)i] = model.addVar(0.01, 1.0, 0.0, GRB_CONTINUOUS, "theta_" + std::to_string(i));
+        T[(size_t)i]     = model.addVar(0.01, 2, 0.0, GRB_CONTINUOUS, "T_" + std::to_string(i));
       }
 
       // Build flow vars only for (i,s,t,u,v) where edge exists
@@ -394,13 +394,13 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
 
       model.optimize();
       auto t1 = std::chrono::steady_clock::now();
-      // if (logging_){
+      if (logging_){
         std::cout << "Done in " << std::chrono::duration<double>(t1 - t0).count() << " cost " << model.get(GRB_DoubleAttr_ObjVal) << std::endl;
         std::cout << "Status " << model.get(GRB_IntAttr_Status) << "\n";
         std::cout << "ObjVal " << model.get(GRB_DoubleAttr_ObjVal) << "\n";
         std::cout << "IterCount " << model.get(GRB_DoubleAttr_IterCount) << "\n";
         std::cout << "BarIterCount " << model.get(GRB_IntAttr_BarIterCount) << "\n";
-      // }
+      }
 
       int status = model.get(GRB_IntAttr_Status);
       if (status != GRB_OPTIMAL) {
