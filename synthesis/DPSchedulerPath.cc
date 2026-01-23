@@ -25,7 +25,7 @@ DPScheduler::DPScheduler(
   double delta,
   double alpha_r,
   const std::vector<int>& dims,
-  const std::vector<int>& chunksizes,
+  const std::vector<uint64_t>& chunksizes,
   int relaxation,
   int logging,
   int rd
@@ -353,8 +353,9 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
     for (const auto& dmd : steps_[(size_t)i - 1]) {
       int s = dmd.s;
       int t = dmd.t;
-      int demand = dmd.bits;
-      int k = (int)(demand / chunksizes_[(size_t)i - 1]);
+      uint64_t demand = dmd.bits;
+      std::cout << "demand " << demand << " chunksizes " << chunksizes_[(size_t)i - 1] << "\n";
+      uint64_t k = (uint64_t)(demand / chunksizes_[(size_t)i - 1]);
       temp[Edge{s,t}] = k;
     }
 

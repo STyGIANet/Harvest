@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <regex>
+#include <cstdint>
 
 using json = nlohmann::json;
 
@@ -43,7 +44,7 @@ int main(int argc, char* argv[]) {
   std::vector<int> dims = doc.at("dims").get<std::vector<int>>();
 
   std::vector<std::vector<Demand>> steps;
-  std::vector<int> chunksizes;
+  std::vector<uint64_t> chunksizes;
 
   auto jsteps = doc.at("steps");
   steps.reserve(jsteps.size());
@@ -54,11 +55,11 @@ int main(int argc, char* argv[]) {
     for (const auto& dmd : s.at("demand")) {
       int u = dmd[0].get<int>();
       int v = dmd[1].get<int>();
-      int m_bits = dmd[2].get<int>() * 8;
+      uint64_t m_bits = dmd[2].get<uint64_t>() * 8;
       step.push_back(Demand{u, v, m_bits});
     }
     steps.push_back(std::move(step));
-    chunksizes.push_back(s.at("chunksize").get<int>() * 8);
+    chunksizes.push_back(s.at("chunksize").get<uint64_t>() * 8);
   }
 
   DPScheduler scheduler(

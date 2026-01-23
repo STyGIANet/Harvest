@@ -12,7 +12,7 @@
 struct Demand {
   int s;
   int t;
-  int bits;
+  uint64_t bits;
 };
 
 struct Edge {
@@ -83,7 +83,7 @@ public:
     double delta,
     double alpha_r,
     const std::vector<int>& dims,
-    const std::vector<int>& chunksizes,
+    const std::vector<uint64_t>& chunksizes,
     int relaxation,
     int logging,
     int rd
@@ -135,7 +135,7 @@ private:
   double delta_;
   double alpha_r_;
   std::vector<int> dims_;
-  std::vector<int> chunksizes_;
+  std::vector<uint64_t> chunksizes_;
   int relaxation_;
   int logging_;
   int rd_;
