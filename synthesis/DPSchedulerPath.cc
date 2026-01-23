@@ -354,7 +354,7 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
       int s = dmd.s;
       int t = dmd.t;
       uint64_t demand = dmd.bits;
-      std::cout << "demand " << demand << " chunksizes " << chunksizes_[(size_t)i - 1] << "\n";
+      // std::cout << "demand " << demand << " chunksizes " << chunksizes_[(size_t)i - 1] << "\n";
       uint64_t k = (uint64_t)(demand / chunksizes_[(size_t)i - 1]);
       temp[Edge{s,t}] = k;
     }
@@ -372,8 +372,11 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
     }
   }
 
+  // Lets leave this out as a way to see progress
   std::cout << "\n\n\n\n##### Solving for steps a=" << a << ", b=" << b << " #####\n";
-  std::cout << "total = " << topoSpace << "\n";
+  if (logging_){
+    std::cout << "total = " << topoSpace << "\n";
+  }
 
   std::vector<double> objectiveValue((size_t)topoSpace, INF_D);
 
@@ -570,7 +573,9 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
       model.optimize();
 
       auto t1 = std::chrono::steady_clock::now();
-      std::cout << "Done in " << std::chrono::duration<double>(t1 - t0).count() << " cost " << uint32_t (model.get(GRB_DoubleAttr_ObjVal)/SCALE) << std::endl;
+      if (logging_){
+        std::cout << "Done in " << std::chrono::duration<double>(t1 - t0).count() << " cost " << uint32_t (model.get(GRB_DoubleAttr_ObjVal)/SCALE) << std::endl;
+      }
 
       if (logging_) {
         std::cout << "Status " << model.get(GRB_IntAttr_Status) << "\n";
