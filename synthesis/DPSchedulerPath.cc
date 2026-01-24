@@ -562,7 +562,7 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
   Topology base = base_topology();
   Topology baseRing = base_ring();
 
-  if (collective_ == "all-to-all-nd"){
+  if (collective_ == "all-to-all-nd" && d_>=2){
     Topology topo;
     topo.reserve((size_t)n_ * (size_t)(n_ - 1));
     for (int u = 0; u < n_; ++u) {
