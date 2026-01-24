@@ -16,10 +16,14 @@ from collectives import (
     allGatherSwingMultiportND,
     allReduceSwingMultiportND,
     allToAll,
+    directAllToAll,
     binomialTreeBroadcast,
     binaryTreeBroadcast,
     bruckAllToAll,
     bruckConcatenation,
+    reduceScatterBine,
+    allGatherBine,
+    allReduceBine,
     _parseDims,
 )
 
@@ -78,6 +82,18 @@ def main():
 
         elif collective == "all-to-all":
             steps = allToAll(n, m)
+
+        elif collective == "direct-all-to-all":
+            steps = directAllToAll(n, m)
+
+        elif collective == "reduce-scatter-bine":
+            steps = reduceScatterBine(n, m)
+
+        elif collective == "all-gather-bine":
+            steps = allGatherBine(n, m)
+
+        elif collective == "all-reduce-bine":
+            steps = allReduceBine(n, m)
 
         elif collective == "binomial-broadcast":
             steps = binomialTreeBroadcast(n, m)

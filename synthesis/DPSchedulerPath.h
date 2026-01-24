@@ -86,7 +86,8 @@ public:
     const std::vector<uint64_t>& chunksizes,
     int relaxation,
     int logging,
-    int rd
+    int rd,
+    std::string collective
   );
 
   SchedulerResult synthesize();
@@ -123,6 +124,14 @@ private:
   ) const;
 
   std::pair<Topology, double> completion_time(int a, int b);
+  std::vector<int> torusNeighbors3D(int u) const;
+  int kautzLabelLength() const;
+  std::vector<int> kautzUnrank(int id, int k) const;
+  int kautzRank(const std::vector<int>& x) const;
+  std::vector<int> kautzNeighbors(int u) const;
+  std::vector<int> expanderNeighbors(int u) const;
+  double getDemandStep(int i);
+
 
 private:
   std::vector<std::vector<Demand>> steps_;
@@ -139,6 +148,7 @@ private:
   int relaxation_;
   int logging_;
   int rd_;
+  std::string collective_;
 
   std::unordered_map<std::pair<int,int>, std::pair<Topology,double>, PairHash> cache_;
 };

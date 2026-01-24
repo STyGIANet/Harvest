@@ -77,7 +77,7 @@ for N in ${NODES[@]};do
 				for P in ${PORTS[@]};do
 					for ALG in ${ALGS[@]};do
 						if [[ $ALG == "all-gather-rd-nd" ]];then
-							RD=1
+							RD=0
 						else
 							RD=0
 						fi
@@ -116,7 +116,7 @@ for N in ${NODES[@]};do
 				for P in ${PORTS[@]};do
 					for ALG in ${ALGS[@]};do
 						if [[ $ALG == "all-gather-rd-nd" ]];then
-							RD=1
+							RD=0
 						else
 							RD=0
 						fi

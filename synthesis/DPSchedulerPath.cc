@@ -9,6 +9,7 @@
 #include <thread>
 #include <chrono>
 #include <cstdint>
+#include <numeric>
 
 static constexpr double INF_D = std::numeric_limits<double>::infinity();
 
@@ -28,7 +29,8 @@ DPScheduler::DPScheduler(
   const std::vector<uint64_t>& chunksizes,
   int relaxation,
   int logging,
-  int rd
+  int rd,
+  std::string collective
 )
 : steps_(steps),
   s_((int)steps.size()),
@@ -43,7 +45,8 @@ DPScheduler::DPScheduler(
   chunksizes_(chunksizes),
   relaxation_(relaxation),
   logging_(logging),
-  rd_(rd) {}
+  rd_(rd),
+  collective_(collective) {}
 
 int DPScheduler::ringNext(int u) const { return (u + 1) % n_; }
 int DPScheduler::ringPrev(int u) const { return (u - 1 + n_) % n_; }
@@ -64,6 +67,179 @@ std::vector<int> DPScheduler::torusNeighbors(int u) const {
   return nbrs;
 }
 
+std::vector<int> DPScheduler::torusNeighbors3D(int u) const {
+  int X = dims_.at(0);
+  int Y = dims_.at(1);
+  int Z = dims_.at(2);
+
+  int z = u % Z;
+  int y = (u / Z) % Y;
+  int x = u / (Y * Z);
+
+  auto idx = [&](int xx, int yy, int zz) {
+    return xx * (Y * Z) + yy * Z + zz;
+  };
+
+  std::vector<int> nbrs;
+  nbrs.reserve(6);
+
+  nbrs.push_back(idx((x + 1) % X, y, z));
+  nbrs.push_back(idx((x - 1 + X) % X, y, z));
+
+  nbrs.push_back(idx(x, (y + 1) % Y, z));
+  nbrs.push_back(idx(x, (y - 1 + Y) % Y, z));
+
+  nbrs.push_back(idx(x, y, (z + 1) % Z));
+  nbrs.push_back(idx(x, y, (z - 1 + Z) % Z));
+
+  return nbrs;
+}
+
+int DPScheduler::kautzLabelLength() const {
+  int d = d_;
+  long long n = n_;
+
+  long long base = d + 1;
+  long long cur = base;
+  int k = 1;
+
+  while (cur < n) {
+    cur *= d;
+    ++k;
+  }
+  // At this point, cur is the virtual Kautz size >= n
+
+  // k is also the diameter
+  return k;
+}
+
+std::vector<int> DPScheduler::kautzUnrank(int id, int k) const {
+  int d = d_;
+  std::vector<int> x(k);
+
+  x[0] = id % (d + 1);
+  id /= (d + 1);
+
+  for (int i = 1; i < k; ++i) {
+    int r = id % d;
+    id /= d;
+
+    if (r >= x[i - 1]) r++;
+    x[i] = r;
+  }
+
+  return x;
+}
+
+int DPScheduler::kautzRank(const std::vector<int>& x) const {
+  int d = d_;
+  int k = x.size();
+
+  int id = x[0];
+  int mult = d + 1;
+
+  for (int i = 1; i < k; ++i) {
+    int r = x[i];
+    if (r > x[i - 1]) r--;
+    id += r * mult;
+    mult *= d;
+  }
+
+  return id;
+}
+
+
+std::vector<int> DPScheduler::kautzNeighbors(int u) const {
+  int d = d_;
+  int k = kautzLabelLength();
+  int n = n_;
+
+  // Map physical node to a representative virtual node
+  int v0 = u; // just for simplicity
+
+  auto x = kautzUnrank(v0, k);
+  int last = x[k - 1];
+
+  std::vector<int> nbrs;
+  nbrs.reserve(d);
+
+  std::unordered_set<int> seen;
+
+  for (int y = 0; y <= d && (int)nbrs.size() < d; ++y) {
+    if (y == last) continue;
+
+    std::vector<int> nxt(k);
+    for (int i = 0; i < k - 1; ++i)
+      nxt[i] = x[i + 1];
+    nxt[k - 1] = y;
+
+    int v = kautzRank(nxt);
+    int phys = v % n;
+
+    if (phys != u && !seen.count(phys)) {
+      seen.insert(phys);
+      nbrs.push_back(phys);
+    }
+  }
+
+  int probe = v0 + 1;
+  while ((int)nbrs.size() < d) {
+    int phys = probe % n;
+    if (phys != u && !seen.count(phys)) {
+      seen.insert(phys);
+      nbrs.push_back(phys);
+    }
+    ++probe;
+  }
+
+  return nbrs;
+}
+
+std::vector<int> DPScheduler::expanderNeighbors(int u) const {
+  int n = n_;
+  int d = d_;
+
+  std::vector<int> nbrs;
+  nbrs.reserve(d);
+
+  std::unordered_set<int> seen;
+
+  uint64_t seed = 1469598103934665603ULL ^ (uint64_t)n ^ ((uint64_t)d << 32);
+
+  auto next_coprime = [&](int x) {
+    while (std::gcd(x, n) != 1) ++x;
+    return x;
+  };
+
+  int a = next_coprime(3);
+  int b = 1;
+
+  for (int i = 0; i < d; ++i) {
+    int v = (int)((a * (long long)u + b) % n);
+
+    if (v == u || seen.count(v)) {
+      int bb = b + 1;
+      while (true) {
+        v = (int)((a * (long long)u + bb) % n);
+        if (v != u && !seen.count(v)) {
+          b = bb;
+          break;
+        }
+        ++bb;
+      }
+    }
+
+    seen.insert(v);
+    nbrs.push_back(v);
+
+    a = next_coprime(a + 2);
+    b = (b + seed + i + 1) % n;
+  }
+
+  return nbrs;
+}
+
+
 Topology DPScheduler::base_topology() const {
   Topology base;
   base.reserve((size_t)n_ * (size_t)(n_ - 1));
@@ -75,10 +251,26 @@ Topology DPScheduler::base_topology() const {
       int val = 0;
       if (d_ == 1) {
         if (v == ringNext(u)) val = 1;
-      } else if (d_ == 2) {
+      }
+      else if (collective_ == "direct-all-to-all" && d_ >= 3) {
+        // generalized kautz graph for n, d
+        auto nbrs = kautzNeighbors(u);
+        if (std::find(nbrs.begin(), nbrs.end(), v) != nbrs.end()) val = 1;
+      }
+      else if (collective_ == "all-to-all" && d_ >= 3) {
+        // generalized kautz graph for n, d
+        auto nbrs = kautzNeighbors(u);
+        if (std::find(nbrs.begin(), nbrs.end(), v) != nbrs.end()) val = 1;
+      }
+      else if (d_ == 2) {
         if (v == ringNext(u) || v == ringPrev(u)) val = 1;
-      } else if (d_ == 4) {
+      } 
+      else if (d_ == 4) {
         auto nbrs = torusNeighbors(u);
+        if (std::find(nbrs.begin(), nbrs.end(), v) != nbrs.end()) val = 1;
+      } 
+      else if (d_ == 6) {
+        auto nbrs = torusNeighbors3D(u);
         if (std::find(nbrs.begin(), nbrs.end(), v) != nbrs.end()) val = 1;
       }
       base[Edge{u,v}] = val;
@@ -298,6 +490,19 @@ std::vector<Path> DPScheduler::k_shortest_paths_yen(
   return A;
 }
 
+double DPScheduler::getDemandStep(int i){
+  double chunk = (double)chunksizes_[(size_t)i - 1];
+  double bits = 0;
+  for (const auto& dmd : steps_[(size_t)i - 1]) {
+    int s = dmd.s;
+    if (s!=0)
+      continue;
+    bits += dmd.bits;
+  }
+  bits = (std::max)(chunk, (double)bits);
+  return bits;
+}
+
 std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
   std::pair<int,int> key{a,b};
   auto itc = cache_.find(key);
@@ -314,7 +519,10 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
   Topology base = base_topology();
 
   for (int shift = 0; shift < n_ - 1; ++shift) {
-    if (rd_ == 1 && shift >= 1) break;
+    if (collective_ == "direct-all-to-all" && shift >= 1)
+      break;
+    if (rd_ == 1 && shift >= 1) 
+      break;
 
     Topology topo;
     topo.reserve((size_t)n_ * (size_t)(n_ - 1));
@@ -340,7 +548,10 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
   int end   = (rd_ == 1 ? a + 1 : s_ + 1);
 
   for (int i = start; i < end; ++i) {
-    if (i > (int)steps_.size()) continue;
+    if (collective_ == "direct-all-to-all")
+      break;
+    if (i > (int)steps_.size()) 
+      continue;
 
     Topology temp;
     temp.reserve((size_t)n_ * (size_t)(n_ - 1));
@@ -356,6 +567,11 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
       uint64_t demand = dmd.bits;
       // std::cout << "demand " << demand << " chunksizes " << chunksizes_[(size_t)i - 1] << "\n";
       uint64_t k = (uint64_t)(demand / chunksizes_[(size_t)i - 1]);
+      if (k>d_){
+        std::cout << "Error: running " << k << "-d collective on a " << d_ << "-d network" << std::endl;
+        exit(1);
+      }
+
       temp[Edge{s,t}] = k;
     }
 
@@ -533,21 +749,21 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
       // Ti is basically transmission time. So lets interpret it in nanosecond, or in seconds based on our convinience
       double SCALE = 1; // Makes Ti in nanoseconds
       for (int i = a; i <= b; ++i) {
-        double bits = (double)chunksizes_[(size_t)i - 1];
+        double bits = getDemandStep(i);
         if (beta_ * bits > 1e3){
           SCALE = 1e-9; // Makes Ti in seconds
         }
       }
 
       for (int i = a; i <= b; ++i) {
-        double bits = (double)chunksizes_[(size_t)i - 1];
+        double bits = getDemandStep(i);
         // model.addQConstr(2 * theta[(size_t)i] * T[(size_t)i] == 2 * beta_ * bits);
         GRBVar th = theta[(size_t)i];
         GRBVar Ti = T[(size_t)i];
 
         // Ti is basically transmission time. So lets interpret it in nanosecond, or in seconds based on our convinience
 
-        GRBQuadExpr lhs = (th - Ti) * (th - Ti) + 4.0 * beta_ * bits * SCALE;
+        GRBQuadExpr lhs = (th - Ti) * (th - Ti) + 4.0 * beta_ * bits * SCALE / d_;
         GRBQuadExpr rhs = (th + Ti) * (th + Ti);
         // The inequality here speeds up the optimizer, but even with exact same objective value, it flips to suboptimal status somehow.
         // Definitely looks like a numeric issue and suboptimality could perhaps just be a floating point difference
@@ -556,7 +772,7 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
 
       GRBLinExpr obj = 0.0;
       for (int i = a; i <= b; ++i) {
-        double bits = (double)chunksizes_[(size_t)i - 1];
+        double bits = getDemandStep(i);
         // if (SCALE == 1)
         //   // Everything is nanoseconds here
         //   obj += alpha_ + T[(size_t)i] * (1.0 + (delta_ / (beta_ * bits)));
@@ -566,7 +782,7 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
         // }
         // Since scale is 1 anyway otherwise, getting rid of if else
         // T[(size_t)i] / (beta_ * bits) this term is theta and unitless
-        obj += alpha_*SCALE + T[(size_t)i] + delta_*SCALE * ( T[(size_t)i] / (beta_ * bits));
+        obj += alpha_*SCALE + T[(size_t)i] + delta_*SCALE * ( T[(size_t)i] / (beta_ * bits/ d_));
       }
       model.setObjective(obj, GRB_MINIMIZE);
 

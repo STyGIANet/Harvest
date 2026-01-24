@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
   double alpha_r = std::stod(argv[6]);
   int logging = std::stoi(argv[7]);
   int relaxation = std::stoi(argv[8]);
-  int rd = std::stoi(argv[9]);
+  int rd = std::stoi(argv[9]); // Only for reduce-scatter recursive doubling
   std::string out_file = argv[10];
 
   json doc;
@@ -61,25 +61,28 @@ int main(int argc, char* argv[]) {
     steps.push_back(std::move(step));
     chunksizes.push_back(s.at("chunksize").get<uint64_t>() * 8);
   }
+  
+  std::string collective = doc.at("collective").get<std::string>();
 
   DPScheduler scheduler(
     steps, n, d, c, beta, alpha, delta, alpha_r, dims, chunksizes,
-    relaxation, logging, rd
+    relaxation, logging, rd, collective
   );
 
   SchedulerResult res = scheduler.synthesize();
   auto total_reconf_cost = res.reconf_cost;
   auto k = res.k;
   auto stepTopos = scheduler.expandSchedulePerStep(res.schedule, (int)steps.size());
-  std::regex re(R"(collective-(.+?)(?=-\d))");
-  std::smatch match;
-  std::regex_search(in_file, match, re);
+  // std::regex re(R"(collective-(.+?)(?=-\d))");
+  // std::smatch match;
+  // std::regex_search(in_file, match, re);
   
   json out;
   out["cost"] = res.cost;
   out["num_of_reconfigs"] = k;
   out["alpha_r"] = alpha_r;
-  out["collective"] = match[1];
+  out["collective"] = collective;
+  // out["collective"] = match[1];
   out["reconf_cost_total"] = total_reconf_cost;
   out["steps"] = json::array();
 

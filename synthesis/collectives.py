@@ -19,6 +19,7 @@ def _parseDims(spec: str) -> List[int]:
         raise ValueError("dims must be non-empty")
     return dims
 
+
 ################## Recursive Doubling (cyclic version)
 
 def reduceScatterRecursiveDoubling(
@@ -31,8 +32,8 @@ def reduceScatterRecursiveDoubling(
         raise ValueError("m must be > 0")
 
     s = n.bit_length() - 1
-    if m % (1 << s) != 0:
-        raise ValueError("m must be divisible by n")
+    # if m % (1 << s) != 0:
+    #     raise ValueError("m must be divisible by n")
 
     steps: List[PatternStep] = []
 
@@ -58,8 +59,8 @@ def allGatherRecursiveDoubling(
         raise ValueError("m must be > 0")
 
     s = n.bit_length() - 1
-    if m % (1 << s) != 0:
-        raise ValueError("m must be divisible by n")
+    # if m % (1 << s) != 0:
+    #     raise ValueError("m must be divisible by n")
 
     steps: List[PatternStep] = []
 
@@ -140,14 +141,14 @@ def reduceScatterRecursiveDoublingND(
     for d in dims:
         n *= d
 
-    if m % n != 0:
-        raise ValueError("m must be divisible by n")
-    if m % ports != 0:
-        raise ValueError("m must be divisible by ports")
+    # if m % n != 0:
+    #     raise ValueError("m must be divisible by n")
+    # if m % ports != 0:
+    #     raise ValueError("m must be divisible by ports")
 
     mPerPort = m // ports
-    if mPerPort % n != 0:
-        raise ValueError("m/ports must be divisible by n")
+    # if mPerPort % n != 0:
+    #     raise ValueError("m/ports must be divisible by n")
 
     D = len(dims)
     S = int(math.log2(n))
@@ -192,14 +193,14 @@ def allGatherRecursiveDoublingND(
     for d in dims:
         n *= d
 
-    if m % n != 0:
-        raise ValueError("m must be divisible by n")
-    if m % ports != 0:
-        raise ValueError("m must be divisible by ports")
+    # if m % n != 0:
+    #     raise ValueError("m must be divisible by n")
+    # if m % ports != 0:
+    #     raise ValueError("m must be divisible by ports")
 
     mPerPort = m // ports
-    if mPerPort % n != 0:
-        raise ValueError("m/ports must be divisible by n")
+    # if mPerPort % n != 0:
+    #     raise ValueError("m/ports must be divisible by n")
 
     D = len(dims)
     S = int(math.log2(n))
@@ -267,8 +268,8 @@ def reduceScatterSwing1D(
         raise ValueError("m must be > 0")
 
     s = n.bit_length() - 1
-    if m % (1 << s) != 0:
-        raise ValueError("m must be divisible by n")
+    # if m % (1 << s) != 0:
+    #     raise ValueError("m must be divisible by n")
 
     steps: List[PatternStep] = []
     for i in range(1, s + 1):
@@ -294,8 +295,8 @@ def allGatherSwing1D(
         raise ValueError("m must be > 0")
 
     s = n.bit_length() - 1
-    if m % (1 << s) != 0:
-        raise ValueError("m must be divisible by n")
+    # if m % (1 << s) != 0:
+    #     raise ValueError("m must be divisible by n")
 
     steps: List[PatternStep] = []
     for i in range(1, s + 1):
@@ -444,17 +445,17 @@ def reduceScatterSwingMultiportND(
         n *= d
     if m <= 0:
         raise ValueError("m must be > 0")
-    if m % n != 0:
-        raise ValueError("m must be divisible by n")
+    # if m % n != 0:
+    #     raise ValueError("m must be divisible by n")
     if ports <= 0:
         raise ValueError("ports must be > 0")
-    if m % ports != 0:
-        raise ValueError("m must be divisible by ports")
+    # if m % ports != 0:
+    #     raise ValueError("m must be divisible by ports")
 
     S = math.ceil(math.log2(n))
     mPerPort = m // ports
-    if mPerPort % n != 0:
-        raise ValueError("m/ports must be divisible by n")
+    # if mPerPort % n != 0:
+    #     raise ValueError("m/ports must be divisible by n")
 
     peersPorts: List[List[List[int]]] = []
     bitmapsPorts: List[List[List[List[int]]]] = []
@@ -497,17 +498,17 @@ def allGatherSwingMultiportND(
         n *= d
     if m <= 0:
         raise ValueError("m must be > 0")
-    if m % n != 0:
-        raise ValueError("m must be divisible by n")
+    # if m % n != 0:
+    #     raise ValueError("m must be divisible by n")
     if ports <= 0:
         raise ValueError("ports must be > 0")
-    if m % ports != 0:
-        raise ValueError("m must be divisible by ports")
+    # if m % ports != 0:
+    #     raise ValueError("m must be divisible by ports")
 
     S = math.ceil(math.log2(n))
     mPerPort = m // ports
-    if mPerPort % n != 0:
-        raise ValueError("m/ports must be divisible by n")
+    # if mPerPort % n != 0:
+    #     raise ValueError("m/ports must be divisible by n")
 
     peersPorts: List[List[List[int]]] = []
     bitmapsPorts: List[List[List[List[int]]]] = []
@@ -564,8 +565,8 @@ def allToAll(
         raise ValueError("n must be >= 2")
     if m <= 0:
         raise ValueError("m must be > 0")
-    if m % n != 0:
-        raise ValueError("m must be divisible by n")
+    # if m % n != 0:
+    #     raise ValueError("m must be divisible by n")
 
     chunk = m // n
     steps: List[PatternStep] = []
@@ -575,6 +576,32 @@ def allToAll(
         for u in range(n):
             v = (u + i) % n
             demand.append((u, v, chunk))
+        steps.append(PatternStep(id=i, chunksize=chunk, demand=demand))
+
+    return steps
+
+
+def directAllToAll(
+    n: int,
+    m: int,
+) -> List[PatternStep]:
+    if n <= 1:
+        raise ValueError("n must be >= 2")
+    if m <= 0:
+        raise ValueError("m must be > 0")
+    # if m % n != 0:
+    #     raise ValueError("m must be divisible by n")
+
+    chunk = m // n
+    steps: List[PatternStep] = []
+
+    for i in range(1, 2):
+        demand: List[Pair] = []
+        for u in range(n):
+            for v in range(n):
+                if u==v:
+                    continue
+                demand.append((u, v, chunk))
         steps.append(PatternStep(id=i, chunksize=chunk, demand=demand))
 
     return steps
@@ -669,8 +696,8 @@ def bruckAllToAll(
         raise ValueError("r must be >= 2")
     if ports <= 0:
         raise ValueError("ports must be > 0")
-    if m % n != 0:
-        raise ValueError("m must be divisible by n")
+    # if m % n != 0:
+    #     raise ValueError("m must be divisible by n")
 
     # Require n = r^w (paper handles general n, but this keeps bytes uniform)
     w = 0
@@ -720,8 +747,8 @@ def bruckConcatenation(
         raise ValueError("r must be >= 2")
     if ports <= 0:
         raise ValueError("ports must be > 0")
-    if m % n != 0:
-        raise ValueError("m must be divisible by n")
+    # if m % n != 0:
+    #     raise ValueError("m must be divisible by n")
 
     w = 0
     tmp = 1
@@ -749,5 +776,89 @@ def bruckConcatenation(
             steps.append(PatternStep(id=sid, chunksize=payload, demand=demand))
             sid += 1
             z += ports
+
+    return steps
+
+
+################### Bine butterflies. This is same as swing really!
+# Writing this just for completeness
+
+def bineOffset(s: int, i: int) -> int:
+    e = s - i + 1
+    return (1 - ((-2) ** e)) // 3
+
+def allGatherBine(
+    n: int,
+    m: int,
+) -> List[PatternStep]:
+    if n <= 1 or (n & (n - 1)) != 0:
+        raise ValueError("n must be a power of two and >= 2")
+    if m <= 0:
+        raise ValueError("m must be > 0")
+
+    s = n.bit_length() - 1
+    steps: List[PatternStep] = []
+
+    for i in range(1, s + 1):
+        chunk = m >> (s - i + 1)
+        delta = bineOffset(s, i)
+
+        demand: List[Pair] = []
+        for r in range(n):
+            if r % 2 == 0:
+                q = (r + delta) % n
+            else:
+                q = (r - delta) % n
+            demand.append((r, q, chunk))
+
+        steps.append(PatternStep(id=i, chunksize=chunk, demand=demand))
+
+    return steps
+
+def reduceScatterBine(
+    n: int,
+    m: int,
+) -> List[PatternStep]:
+    if n <= 1 or (n & (n - 1)) != 0:
+        raise ValueError("n must be a power of two and >= 2")
+    if m <= 0:
+        raise ValueError("m must be > 0")
+
+    s = n.bit_length() - 1
+    steps: List[PatternStep] = []
+
+    for i in range(1, s + 1):
+        chunk = m >> i
+        delta = bineOffset(s, s - i + 1)
+
+        demand: List[Pair] = []
+        for r in range(n):
+            if r % 2 == 0:
+                q = (r + delta) % n
+            else:
+                q = (r - delta) % n
+            demand.append((r, q, chunk))
+
+        steps.append(PatternStep(id=i, chunksize=chunk, demand=demand))
+
+    return steps
+
+def allReduceBine(
+    n: int,
+    m: int,
+) -> List[PatternStep]:
+    rs = reduceScatterBine(n, m)
+    ag = allGatherBine(n, m)
+
+    steps: List[PatternStep] = []
+    sid = 1
+
+    for st in rs:
+        steps.append(PatternStep(id=sid, chunksize=st.chunksize, demand=st.demand))
+        sid += 1
+
+    for st in ag:
+        steps.append(PatternStep(id=sid, chunksize=st.chunksize, demand=st.demand))
+        sid += 1
 
     return steps
