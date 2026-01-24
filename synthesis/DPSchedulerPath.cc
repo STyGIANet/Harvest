@@ -259,7 +259,7 @@ Topology DPScheduler::base_topology() const {
       }
       else if (collective_ == "all-to-all" && d_ >= 3) {
         // generalized kautz graph for n, d
-        auto nbrs = kautzNeighbors(u);
+        auto nbrs = expanderNeighbors(u);
         if (std::find(nbrs.begin(), nbrs.end(), v) != nbrs.end()) val = 1;
       }
       else if (d_ == 2) {
