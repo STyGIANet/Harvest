@@ -39,7 +39,7 @@ MESSAGE_NAMES=(1KB 2KB 4KB 8KB 16KB 32KB 64KB 128KB 256KB 512KB 1MB 2MB 4MB 8MB 
 
 NODES=(4 8 16 32 64 128 256)
 PORTS=(1 2)
-ALGS=(all-gather-rd-nd all-gather-swing-nd all-to-all)
+ALGS=(all-gather-rd-nd all-gather-swing-nd all-to-all-nd direct-all-to-all)
 
 echo "Generating 1D AllGather"
 
@@ -50,11 +50,7 @@ for N in ${NODES[@]};do
 				MESSAGE_SIZE=${MESSAGE_SIZES[$IDX]}
 				MESSAGE_NAME=${MESSAGE_NAMES[$IDX]}
 				OUTFILE=$DUMP_DIR/collective-$ALG-$N-$P-$MESSAGE_NAME.json
-				if [[ $ALG == "all-to-all" ]];then
-					python3 generate-collective.py $N $MESSAGE_SIZE $ALG $OUTFILE
-				else
-					python3 generate-collective.py $N $MESSAGE_SIZE $P $ALG $OUTFILE
-				fi
+				python3 generate-collective.py $N $MESSAGE_SIZE $P $ALG $OUTFILE
 			done
 		done
 	done
