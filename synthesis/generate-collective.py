@@ -16,6 +16,7 @@ from collectives import (
     allGatherSwingMultiportND,
     allReduceSwingMultiportND,
     allToAll,
+    allToAllNd,
     directAllToAll,
     binomialTreeBroadcast,
     binaryTreeBroadcast,
@@ -83,9 +84,6 @@ def main():
         elif collective == "all-to-all":
             steps = allToAll(n, m)
 
-        elif collective == "direct-all-to-all":
-            steps = directAllToAll(n, m)
-
         elif collective == "reduce-scatter-bine":
             steps = reduceScatterBine(n, m)
 
@@ -142,6 +140,12 @@ def main():
             steps = allGatherSwingMultiportND(dims, m, ports)
         elif collective == "all-reduce-swing-nd":
             steps = allReduceSwingMultiportND(dims, m, ports)
+
+        elif collective == "all-to-all-nd":
+            steps = allToAllNd(n, m, ports)
+
+        elif collective == "direct-all-to-all":
+            steps = directAllToAll(n, m, ports)
 
         elif collective == "reduce-scatter-rd-nd":
             steps = reduceScatterRecursiveDoublingND(dims, m, ports)

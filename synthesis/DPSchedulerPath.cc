@@ -239,6 +239,42 @@ std::vector<int> DPScheduler::expanderNeighbors(int u) const {
   return nbrs;
 }
 
+std::vector<int> DPScheduler::deBruijnNeighbors(int u) const {
+  int n = n_;
+  int d = d_;
+
+  std::vector<int> nbrs;
+  nbrs.reserve(d);
+
+  for (int c = 0; c < d; ++c) {
+    int v = (int)((u * (long long)d + c + 1) % n);
+
+    if (v == u) {
+      v = (v + 1) % n;
+    }
+
+    nbrs.push_back(v);
+  }
+
+  return nbrs;
+}
+
+Topology DPScheduler::base_ring() const {
+  Topology base;
+  base.reserve((size_t)n_ * (size_t)(n_ - 1));
+
+  for (int u = 0; u < n_; ++u) {
+    for (int v = 0; v < n_; ++v) {
+      if (u == v) continue;
+
+      int val = 0;
+      if (v == ringNext(u)) val = d_;
+      base[Edge{u,v}] = val;
+    }
+  }
+  return base;
+}
+
 
 Topology DPScheduler::base_topology() const {
   Topology base;
@@ -254,12 +290,11 @@ Topology DPScheduler::base_topology() const {
       }
       else if (collective_ == "direct-all-to-all" && d_ >= 3) {
         // generalized kautz graph for n, d
-        auto nbrs = kautzNeighbors(u);
+        auto nbrs = expanderNeighbors(u);
         if (std::find(nbrs.begin(), nbrs.end(), v) != nbrs.end()) val = 1;
       }
-      else if (collective_ == "all-to-all" && d_ >= 3) {
-        // generalized kautz graph for n, d
-        auto nbrs = expanderNeighbors(u);
+      else if (collective_ == "all-to-all-nd" && d_ >= 2) {
+        auto nbrs = deBruijnNeighbors(u);
         if (std::find(nbrs.begin(), nbrs.end(), v) != nbrs.end()) val = 1;
       }
       else if (d_ == 2) {
@@ -499,7 +534,15 @@ double DPScheduler::getDemandStep(int i){
       continue;
     bits += dmd.bits;
   }
-  bits = (std::max)(chunk, (double)bits);
+  if (collective_ == "direct-all-to-all"){
+    // This is many to many type of communication
+    bits = (double)bits;
+  }
+  else{
+    // For other models, we can rely on chunk, or total number of bits from each source. 
+    // This aligns with the normalization later.
+    bits = (std::max)(chunk, (double)bits);
+  }
   return bits;
 }
 
@@ -517,12 +560,35 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
   int topoSpace = 0;
 
   Topology base = base_topology();
+  Topology baseRing = base_ring();
 
-  for (int shift = 0; shift < n_ - 1; ++shift) {
+  if (collective_ == "all-to-all-nd"){
+    Topology topo;
+    topo.reserve((size_t)n_ * (size_t)(n_ - 1));
+    for (int u = 0; u < n_; ++u) {
+      for (int v = 0; v < n_; ++v) {
+        if (u == v) continue;
+        topo[Edge{u,v}] = 0;
+      }
+    }
+    Topology toUse = base;
+    for (const auto& kv : toUse) {
+      const Edge& e = kv.first;
+      int val = kv.second;
+      if (e.u == e.v) continue;
+      topo[Edge{e.u, e.v}] = val;
+    }
+    y.push_back(std::move(topo));
+    topoSpace++;
+  }
+
+  for (int shift = 0; shift < n_; ++shift) {
     if (collective_ == "direct-all-to-all" && shift >= 1)
       break;
     if (rd_ == 1 && shift >= 1) 
       break;
+    // if (collective_ == "all-to-all" && d_ >=3 && shift%2!=0)
+    //   continue;
 
     Topology topo;
     topo.reserve((size_t)n_ * (size_t)(n_ - 1));
@@ -532,7 +598,10 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
         topo[Edge{u,v}] = 0;
       }
     }
-    for (const auto& kv : base) {
+    Topology toUse = base;
+    if (collective_ == "all-to-all-nd")
+      toUse = baseRing;
+    for (const auto& kv : toUse) {
       const Edge& e = kv.first;
       int val = kv.second;
       int uprime = e.u % n_;
@@ -548,7 +617,7 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
   int end   = (rd_ == 1 ? a + 1 : s_ + 1);
 
   for (int i = start; i < end; ++i) {
-    if (collective_ == "direct-all-to-all")
+    if (collective_ == "direct-all-to-all" || (collective_ == "all-to-all-nd" && d_ >=2))
       break;
     if (i > (int)steps_.size()) 
       continue;
@@ -596,6 +665,16 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
 
   std::vector<double> objectiveValue((size_t)topoSpace, INF_D);
 
+  // Ti is basically transmission time. So lets interpret it in nanosecond, or in seconds based on our convinience
+  double SCALE = 1; // Makes Ti in nanoseconds
+  for (int i = 1; i <= s_; ++i) {
+    double bits = getDemandStep(i);
+    if (beta_ * bits / d_ > 1e4){
+      SCALE = 1e-9; // Makes Ti in seconds
+    }
+  }
+  std::cout << "SCALE " << SCALE << std::endl;
+
   for (int search = 0; search < topoSpace; ++search) {
     const Topology& x = y[(size_t)search];
 
@@ -628,6 +707,7 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
       bySource[st.first].insert(st.second);
     }
     if (!checkReachable(adj, bySource)) {
+      // std::cout << "Unreachable" << std::endl;
       continue;
     }
 
@@ -667,7 +747,7 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
       std::vector<GRBVar> T((size_t)Imax + 1);
 
       for (int i = 0; i <= Imax; ++i) {
-        theta[(size_t)i] = model.addVar(0.01, 1.0, 0.0, GRB_CONTINUOUS, "theta_" + std::to_string(i));
+        theta[(size_t)i] = model.addVar(0.01, d_, 0.0, GRB_CONTINUOUS, "theta_" + std::to_string(i));
         // This is frustrating....
         // The T variable is causing numerical issues randomly 
         T[(size_t)i]     = model.addVar(0, GRB_INFINITY, 0.0, GRB_CONTINUOUS, "T_" + std::to_string(i));
@@ -692,7 +772,9 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
         for (const auto& dmd : steps_[(size_t)i - 1]) {
           int s = dmd.s;
           int t = dmd.t;
-          int dint = (int)std::floor((double)dmd.bits * inv);
+          // int dint = (int)std::floor((double)dmd.bits * inv);
+          double dint = (double)dmd.bits * inv;
+          // std::cout << "dint " << dint << std::endl;
 
           Pair st{s,t};
           const auto& paths = P.at(st);
@@ -746,15 +828,6 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
         }
       }
 
-      // Ti is basically transmission time. So lets interpret it in nanosecond, or in seconds based on our convinience
-      double SCALE = 1; // Makes Ti in nanoseconds
-      for (int i = a; i <= b; ++i) {
-        double bits = getDemandStep(i);
-        if (beta_ * bits > 1e5){
-          SCALE = 1e-9; // Makes Ti in seconds
-        }
-      }
-
       for (int i = a; i <= b; ++i) {
         double bits = getDemandStep(i);
         // model.addQConstr(2 * theta[(size_t)i] * T[(size_t)i] == 2 * beta_ * bits);
@@ -775,14 +848,14 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
         double bits = getDemandStep(i);
         // if (SCALE == 1)
         //   // Everything is nanoseconds here
-        //   obj += alpha_ + T[(size_t)i] * (1.0 + (delta_ / (beta_ * bits)));
+        //   obj += alpha_ + T[(size_t)i] * (1.0 + (delta_ / (beta_ * bits / d_)));
         // else{
           // Everything is converted to seconds here.
           // obj += alpha_*SCALE + T[(size_t)i] + delta_ * ( T[(size_t)i] / (beta_ * bits));
         // }
         // Since scale is 1 anyway otherwise, getting rid of if else
-        // T[(size_t)i] / (beta_ * bits) this term is theta and unitless
-        obj += alpha_*SCALE + T[(size_t)i] + delta_*SCALE * ( T[(size_t)i] / (beta_ * bits/ d_));
+        // T[(size_t)i] / (beta_ * bits * SCALE/ d_) this term is theta and unitless
+        obj += alpha_*SCALE + T[(size_t)i] + delta_ * ( T[(size_t)i] / (beta_ * bits / d_));
       }
       model.setObjective(obj, GRB_MINIMIZE);
 
@@ -793,12 +866,12 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
         std::cout << "Done in " << std::chrono::duration<double>(t1 - t0).count() << " cost " << uint32_t (model.get(GRB_DoubleAttr_ObjVal)/SCALE) << std::endl;
       }
 
-      if (logging_) {
+      // if (logging_) {
         std::cout << "Status " << model.get(GRB_IntAttr_Status) << "\n";
-        std::cout << "ObjVal " << model.get(GRB_DoubleAttr_ObjVal) << "\n";
-        std::cout << "IterCount " << model.get(GRB_DoubleAttr_IterCount) << "\n";
-        std::cout << "BarIterCount " << model.get(GRB_IntAttr_BarIterCount) << "\n";
-      }
+        std::cout << "ObjVal " << uint32_t (model.get(GRB_DoubleAttr_ObjVal)/SCALE) << "\n";
+        // std::cout << "IterCount " << model.get(GRB_DoubleAttr_IterCount) << "\n";
+        // std::cout << "BarIterCount " << model.get(GRB_IntAttr_BarIterCount) << "\n";
+      // }
 
       int status = model.get(GRB_IntAttr_Status);
       if (status != GRB_OPTIMAL && status != GRB_SUBOPTIMAL) {

@@ -580,10 +580,10 @@ def allToAll(
 
     return steps
 
-
-def directAllToAll(
+def allToAllNd(
     n: int,
     m: int,
+    p: int,
 ) -> List[PatternStep]:
     if n <= 1:
         raise ValueError("n must be >= 2")
@@ -592,7 +592,33 @@ def directAllToAll(
     # if m % n != 0:
     #     raise ValueError("m must be divisible by n")
 
-    chunk = m // n
+    chunk = m // n // p
+    steps: List[PatternStep] = []
+
+    for i in range(1, n):
+        demand: List[Pair] = []
+        for u in range(n):
+            v = (u + i) % n
+            dem = m // n
+            demand.append((u, v, dem))
+        steps.append(PatternStep(id=i, chunksize=chunk, demand=demand))
+
+    return steps
+
+
+def directAllToAll(
+    n: int,
+    m: int,
+    p: int,
+) -> List[PatternStep]:
+    if n <= 1:
+        raise ValueError("n must be >= 2")
+    if m <= 0:
+        raise ValueError("m must be > 0")
+    # if m % n != 0:
+    #     raise ValueError("m must be divisible by n")
+
+    chunk = m // p
     steps: List[PatternStep] = []
 
     for i in range(1, 2):
@@ -601,7 +627,7 @@ def directAllToAll(
             for v in range(n):
                 if u==v:
                     continue
-                demand.append((u, v, chunk))
+                demand.append((u, v, m // n))
         steps.append(PatternStep(id=i, chunksize=chunk, demand=demand))
 
     return steps

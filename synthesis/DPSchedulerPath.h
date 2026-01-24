@@ -104,6 +104,7 @@ private:
   std::vector<int> torusNeighbors(int u) const;
 
   Topology base_topology() const;
+  Topology base_ring() const;
 
   bool checkReachable(
     const std::vector<std::vector<int>>& adj,
@@ -130,6 +131,7 @@ private:
   int kautzRank(const std::vector<int>& x) const;
   std::vector<int> kautzNeighbors(int u) const;
   std::vector<int> expanderNeighbors(int u) const;
+  std::vector<int> deBruijnNeighbors(int u) const;
   double getDemandStep(int i);
 
 
