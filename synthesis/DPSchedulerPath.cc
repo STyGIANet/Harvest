@@ -915,6 +915,9 @@ SchedulerResult DPScheduler::synthesize() {
     auto [cost_no_reconf, sched] = synthesize_for_k(k);
     double total_cost = cost_no_reconf + (double)k * alpha_r_;
     if (total_cost < best_cost) {
+      if (std::fabs(total_cost - best_cost) < 1e-4 && best_k <= k) continue; 
+      if (logging_)
+        std::cout << "total cost " << total_cost << " best cost " << best_cost << " best k " << best_k << " k " << k << std::endl;
       best_cost = total_cost;
       best_schedule = std::move(sched);
       best_total_reconf_cost = (double)k * alpha_r_;
