@@ -47,6 +47,7 @@ Our repository currently supports the following collectives:
 	- all-reduce-swing
 - Naive All-to-all
 	- all-to-all
+	- direct-all-to-all
 - Binomial tree broadcast
 	- binomial-broadcast
 - Binary tree broadcast
@@ -60,6 +61,8 @@ reduce-scatter collective using recursive doubling algorithm, with 4x4 dimension
 
 ```
 python3 generate-collective.py 4x4 1024 4 reduce-scatter-rd-nd out.json
+python3 generate-collective.py 8 4096 2 all-to-all-nd out.json # all to all, scales the size to k ports
+python3 generate-collective.py 8 4096 2 direct-all-to-all out.json # send all at once, scales by k ports
 ```
 
 For Bruck's algorithm, we use a special format to indicate the `r` and `p` parameters within the name.
