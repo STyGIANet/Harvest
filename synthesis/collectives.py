@@ -708,35 +708,20 @@ def binaryTreeBroadcast(
 
 ######################### Bruck's All-to-All
 
+
 def bruckAllToAll(
     n: int,
     m: int,
     r: int,
     ports: int,
 ) -> List[PatternStep]:
-    if n <= 1:
-        raise ValueError("n must be >= 2")
-    if m <= 0:
-        raise ValueError("m must be > 0")
-    if r <= 1:
-        raise ValueError("r must be >= 2")
-    if ports <= 0:
-        raise ValueError("ports must be > 0")
-    # if m % n != 0:
-    #     raise ValueError("m must be divisible by n")
+    if n <= 1: raise ValueError("n must be >= 2")
+    if m <= 0: raise ValueError("m must be > 0")
+    if r <= 1: raise ValueError("r must be >= 2")
+    if ports <= 0: raise ValueError("ports must be > 0")
 
-    # Require n = r^w (paper handles general n, but this keeps bytes uniform)
-    w = 0
-    tmp = 1
-    while tmp < n:
-        tmp *= r
-        w += 1
-    if tmp != n:
-        raise ValueError("n must be a power of r for uniform Bruck index")
-
-    # Each step sends ~ m / r bytes per rank
-    bytes_per_step = m // r
-
+    w = math.ceil(math.log(n, r))
+    block_size = m // n
     steps: List[PatternStep] = []
     sid = 1
 
@@ -744,18 +729,26 @@ def bruckAllToAll(
         base = r ** x
         z = 1
         while z <= r - 1:
-            zs = list(range(z, min(r, z + ports)))
+            num_transfers = min(ports, r - z)
+            zs = list(range(z, z + num_transfers))            
+            jump_volumes = {}
+            for zz in zs:
+                count = sum(1 for k in range(n) if (k // base) % r == zz)
+                jump_volumes[zz] = count * block_size
+
+            step_max_volume = max(jump_volumes.values()) if jump_volumes else 0
+            
             demand: List[Pair] = []
             for u in range(n):
                 for zz in zs:
                     v = (u + zz * base) % n
-                    demand.append((u, v, bytes_per_step))
-            steps.append(PatternStep(id=sid, chunksize=bytes_per_step, demand=demand))
+                    demand.append((u, v, jump_volumes[zz]))
+
+            steps.append(PatternStep(id=sid, chunksize=step_max_volume, demand=demand))
             sid += 1
-            z += ports
+            z += num_transfers
 
     return steps
-
 
 ###################### Bruck's concatenation (AllGather)
 
@@ -765,44 +758,38 @@ def bruckConcatenation(
     r: int,
     ports: int,
 ) -> List[PatternStep]:
-    if n <= 1:
-        raise ValueError("n must be >= 2")
-    if m <= 0:
-        raise ValueError("m must be > 0")
-    if r <= 1:
-        raise ValueError("r must be >= 2")
-    if ports <= 0:
-        raise ValueError("ports must be > 0")
-    # if m % n != 0:
-    #     raise ValueError("m must be divisible by n")
+    if n <= 1: raise ValueError("n must be >= 2")
+    if m <= 0: raise ValueError("m must be > 0")
+    if r <= 1: raise ValueError("r must be >= 2")
+    if ports <= 0: raise ValueError("ports must be > 0")
 
-    w = 0
-    tmp = 1
-    while tmp < n:
-        tmp *= r
-        w += 1
-    if tmp != n:
-        raise ValueError("n must be a power of r for uniform Bruck concat")
-
-    block = m // n
+    w = math.ceil(math.log(n, r))
+    block_size = m // n
     steps: List[PatternStep] = []
     sid = 1
 
     for x in range(w):
-        base = r ** x
-        payload = block * base
+        base = r ** x        
+        num_blocks = min(base, n-base) if base < n else 0
+        if num_blocks <= 0:
+            break
+        payload = block_size * num_blocks
+        
         z = 1
         while z <= r - 1:
-            zs = list(range(z, min(r, z + ports)))
+            num_transfers = min(ports, r - z)
+            zs = list(range(z, z + num_transfers))
+            
             demand: List[Pair] = []
             for u in range(n):
                 for zz in zs:
                     v = (u + zz * base) % n
                     demand.append((u, v, payload))
+            
             steps.append(PatternStep(id=sid, chunksize=payload, demand=demand))
             sid += 1
-            z += ports
-
+            z += num_transfers
+            
     return steps
 
 

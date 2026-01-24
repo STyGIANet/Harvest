@@ -252,7 +252,6 @@ std::vector<int> DPScheduler::deBruijnNeighbors(int u) const {
     if (v == u) {
       v = (v + 1) % n;
     }
-
     nbrs.push_back(v);
   }
 
@@ -288,12 +287,16 @@ Topology DPScheduler::base_topology() const {
       if (d_ == 1) {
         if (v == ringNext(u)) val = 1;
       }
-      else if (collective_ == "direct-all-to-all" && d_ >= 3) {
+      else if (collective_ == "direct-all-to-all") {
         // generalized kautz graph for n, d
-        auto nbrs = expanderNeighbors(u);
+        auto nbrs = d_>=3? expanderNeighbors(u) : deBruijnNeighbors(u);
         if (std::find(nbrs.begin(), nbrs.end(), v) != nbrs.end()) val = 1;
       }
       else if (collective_ == "all-to-all-nd" && d_ >= 2) {
+        auto nbrs = deBruijnNeighbors(u);
+        if (std::find(nbrs.begin(), nbrs.end(), v) != nbrs.end()) val = 1;
+      }
+      else if ((collective_.rfind("bruckallgather", 0) == 0 || collective_.rfind("bruckalltoall", 0) == 0) && d_ >= 2) {
         auto nbrs = deBruijnNeighbors(u);
         if (std::find(nbrs.begin(), nbrs.end(), v) != nbrs.end()) val = 1;
       }
@@ -562,7 +565,7 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
   Topology base = base_topology();
   Topology baseRing = base_ring();
 
-  if (collective_ == "all-to-all-nd" && d_>=2){
+  if ((collective_ == "all-to-all-nd" || collective_.rfind("bruckallgather", 0) == 0 || collective_.rfind("bruckalltoall", 0) == 0) && d_>=2){
     Topology topo;
     topo.reserve((size_t)n_ * (size_t)(n_ - 1));
     for (int u = 0; u < n_; ++u) {
@@ -582,20 +585,26 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
     topoSpace++;
   }
 
-  for (int shift = 0; shift < n_; ++shift) {
+  int numShit = n_;
+  if ((collective_.rfind("bruckallgather", 0) == 0 || collective_.rfind("bruckalltoall", 0) == 0)&& d_>=2)
+    numShit = s_;
+
+  for (int shift = 0; shift < numShit; ++shift) {
     if (collective_ == "direct-all-to-all" && shift >= 1)
+      break;
+    if ((collective_.rfind("bruckallgather", 0) == 0 || collective_.rfind("bruckalltoall", 0) == 0) && d_>=2)
       break;
     if (rd_ == 1 && shift >= 1) 
       break;
     // if (collective_ == "all-to-all" && d_ >=3 && shift%2!=0)
     //   continue;
 
-    Topology topo;
-    topo.reserve((size_t)n_ * (size_t)(n_ - 1));
+    Topology temp;
+    temp.reserve((size_t)n_ * (size_t)(n_ - 1));
     for (int u = 0; u < n_; ++u) {
       for (int v = 0; v < n_; ++v) {
         if (u == v) continue;
-        topo[Edge{u,v}] = 0;
+        temp[Edge{u,v}] = 0;
       }
     }
     Topology toUse = base;
@@ -607,10 +616,19 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
       int uprime = e.u % n_;
       int vprime = (e.v + shift) % n_;
       if (uprime == vprime) continue;
-      topo[Edge{uprime, vprime}] = val;
+      temp[Edge{uprime, vprime}] = val;
     }
-    y.push_back(std::move(topo));
-    topoSpace++;
+    bool redundant = false;
+    for (const auto& prev : y) {
+      if (topoEqualFull(temp, prev)) {
+        redundant = true;
+        break;
+      }
+    }
+    if (!redundant) {
+      y.push_back(std::move(temp));
+      topoSpace++;
+    }
   }
 
   int start = (rd_ == 1 ? a : 1);
@@ -669,7 +687,7 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
   double SCALE = 1; // Makes Ti in nanoseconds
   for (int i = 1; i <= s_; ++i) {
     double bits = getDemandStep(i);
-    if (beta_ * bits / d_ > 1e4){
+    if (beta_ * bits / d_ > 1e3){
       SCALE = 1e-9; // Makes Ti in seconds
     }
   }
