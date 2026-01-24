@@ -118,7 +118,28 @@ done
 echo "Generating 2D AllGather"
 
 DIMS=(4x4 8x4 16x4 8x8 16x8)
-PORTS=(1 2 4)
+PORTS=(4)
+ALGS=(all-gather-rd-nd all-gather-swing-nd)
+
+for N in ${DIMS[@]};do
+	for P in ${PORTS[@]};do
+		for ALG in ${ALGS[@]};do
+			for IDX in ${!MESSAGE_SIZES[@]};do
+				MESSAGE_SIZE=${MESSAGE_SIZES[$IDX]}
+				MESSAGE_NAME=${MESSAGE_NAMES[$IDX]}
+				OUTFILE=$DUMP_DIR/collective-$ALG-$N-$P-$MESSAGE_NAME.json
+				python3 generate-collective.py $N $MESSAGE_SIZE $P $ALG $OUTFILE
+			done
+		done
+	done
+done
+
+############# 3D AllGather #############
+
+echo "Generating 3D AllGather"
+
+DIMS=(4x4x4 8x4x2 16x2x2)
+PORTS=(6)
 ALGS=(all-gather-rd-nd all-gather-swing-nd)
 
 for N in ${DIMS[@]};do
@@ -138,7 +159,7 @@ done
 
 echo "Generating Broadcast"
 
-NODES=(4 8 16 32 64 128)
+NODES=(4 8 16 32 64 128 256)
 PORTS=(1)
 ALGS=(binomial-broadcast binary-broadcast)
 
