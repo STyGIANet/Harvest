@@ -4,8 +4,12 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 COLL_DIR=$SCRIPT_DIR/collectives
 TOPO_DIR=$SCRIPT_DIR/topologies
+DUMP_DIR=$SCRIPT_DIR/dump
 if [[ ! -d $TOPO_DIR ]];then
 	mkdir -p $TOPO_DIR
+fi
+if [[ ! -d $DUMP_DIR ]];then
+	mkdir -p $DUMP_DIR
 fi
 
 NUM_PARALLEL=$1
@@ -86,13 +90,14 @@ for N in ${NODES[@]};do
 							MESSAGE_NAME=${MESSAGE_NAMES[$IDX]}
 							COLLECTIVE_FILE=$COLL_DIR/collective-$ALG-$N-$P-$MESSAGE_NAME.json
 							OUTFILE=$TOPO_DIR/topology-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.json
+							DUMPFILE=$DUMP_DIR/topology-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.dump
 							NUM_EXPS=$(( $NUM_EXPS + 1 ))
 							while [[ $(ps aux | grep '/bin/bash ./synthesize-schedule' | wc -l) -gt $NUM_PARALLEL ]];do
 								sleep 2
 								echo "waiting at $NUM_EXPS..."
 							done
 							echo "synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE"
-							time (./synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE; echo "################################"; echo $OUTFILE; echo "############################") &
+							time (./synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE > $DUMPFILE 2> $DUMPFILE; echo "################################"; echo $OUTFILE; echo "############################") &
 							# exit
 							# sleep 0.5
 						done
@@ -129,13 +134,14 @@ for N in ${NODES[@]};do
 							MESSAGE_NAME=${MESSAGE_NAMES[$IDX]}
 							COLLECTIVE_FILE=$COLL_DIR/collective-$ALG-$N-$P-$MESSAGE_NAME.json
 							OUTFILE=$TOPO_DIR/topology-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.json
+							DUMPFILE=$DUMP_DIR/topology-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.dump
 							NUM_EXPS=$(( $NUM_EXPS + 1 ))
 							while [[ $(ps aux | grep '/bin/bash ./synthesize-schedule' | wc -l) -gt $NUM_PARALLEL ]];do
 								sleep 2
 								echo "waiting at $NUM_EXPS..."
 							done
 							echo "synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE"
-							time (./synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE; echo "################################"; echo $OUTFILE; echo "############################") &
+							time (./synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE > $DUMPFILE 2> $DUMPFILE; echo "################################"; echo $OUTFILE; echo "############################") &
 							# exit
 							# sleep 0.5
 						done
@@ -171,13 +177,14 @@ for N in ${NODES[@]};do
 							MESSAGE_NAME=${MESSAGE_NAMES[$IDX]}
 							COLLECTIVE_FILE=$COLL_DIR/collective-$ALG-$N-$P-$MESSAGE_NAME.json
 							OUTFILE=$TOPO_DIR/topology-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.json
+							DUMPFILE=$DUMP_DIR/topology-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.dump
 							NUM_EXPS=$(( $NUM_EXPS + 1 ))
 							while [[ $(ps aux | grep '/bin/bash ./synthesize-schedule' | wc -l) -gt $NUM_PARALLEL ]];do
 								sleep 2
 								echo "waiting at $NUM_EXPS..."
 							done
 							echo "synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE"
-							time (./synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE; echo "################################"; echo $OUTFILE; echo "############################") &
+							time (./synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE > $DUMPFILE 2> $DUMPFILE; echo "################################"; echo $OUTFILE; echo "############################") &
 							# exit
 							# sleep 0.5
 						done
@@ -211,13 +218,14 @@ for N in ${NODES[@]};do
 							MESSAGE_NAME=${MESSAGE_NAMES[$IDX]}
 							COLLECTIVE_FILE=$COLL_DIR/collective-$ALG-$N-$P-$MESSAGE_NAME.json
 							OUTFILE=$TOPO_DIR/topology-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.json
+							DUMPFILE=$DUMP_DIR/topology-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.dump
 							NUM_EXPS=$(( $NUM_EXPS + 1 ))
 							while [[ $(ps aux | grep '/bin/bash ./synthesize-schedule' | wc -l) -gt $NUM_PARALLEL ]];do
 								sleep 2
 								echo "waiting at $NUM_EXPS..."
 							done
 							echo "synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE"
-							time (./synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE; echo "################################"; echo $OUTFILE; echo "############################") &
+							time (./synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE > $DUMPFILE 2> $DUMPFILE; echo "################################"; echo $OUTFILE; echo "############################") &
 							# exit
 							# sleep 0.5
 						done
@@ -255,13 +263,14 @@ for N in ${NODES[@]};do
 							MESSAGE_NAME=${MESSAGE_NAMES[$IDX]}
 							COLLECTIVE_FILE=$COLL_DIR/collective-$ALG-$N-$P-$MESSAGE_NAME.json
 							OUTFILE=$TOPO_DIR/topology-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.json
+							DUMPFILE=$DUMP_DIR/topology-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.dump
 							NUM_EXPS=$(( $NUM_EXPS + 1 ))
 							while [[ $(ps aux | grep '/bin/bash ./synthesize-schedule' | wc -l) -gt $NUM_PARALLEL ]];do
 								sleep 2
 								echo "waiting at $NUM_EXPS..."
 							done
 							echo "synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE"
-							time (./synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE; echo "################################"; echo $OUTFILE; echo "############################") &
+							time (./synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE > $DUMPFILE 2> $DUMPFILE; echo "################################"; echo $OUTFILE; echo "############################") &
 							# exit
 							# sleep 0.5
 						done
@@ -298,13 +307,14 @@ for N in ${NODES[@]};do
 							MESSAGE_NAME=${MESSAGE_NAMES[$IDX]}
 							COLLECTIVE_FILE=$COLL_DIR/collective-$ALG-$N-$P-$MESSAGE_NAME.json
 							OUTFILE=$TOPO_DIR/topology-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.json
+							DUMPFILE=$DUMP_DIR/topology-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.dump
 							NUM_EXPS=$(( $NUM_EXPS + 1 ))
 							while [[ $(ps aux | grep '/bin/bash ./synthesize-schedule' | wc -l) -gt $NUM_PARALLEL ]];do
 								sleep 2
 								echo "waiting at $NUM_EXPS..."
 							done
 							echo "synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE"
-							time (./synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE; echo "################################"; echo $OUTFILE; echo "############################") &
+							time (./synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE > $DUMPFILE 2> $DUMPFILE; echo "################################"; echo $OUTFILE; echo "############################") &
 							# exit
 							# sleep 0.5
 						done
@@ -342,13 +352,14 @@ for N in ${NODES[@]};do
 							MESSAGE_NAME=${MESSAGE_NAMES[$IDX]}
 							COLLECTIVE_FILE=$COLL_DIR/collective-$ALG-$N-$P-$MESSAGE_NAME.json
 							OUTFILE=$TOPO_DIR/topology-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.json
+							DUMPFILE=$DUMP_DIR/topology-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.dump
 							NUM_EXPS=$(( $NUM_EXPS + 1 ))
 							while [[ $(ps aux | grep '/bin/bash ./synthesize-schedule' | wc -l) -gt $NUM_PARALLEL ]];do
 								sleep 2
 								echo "waiting at $NUM_EXPS..."
 							done
 							echo "synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE"
-							time (./synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE; echo "################################"; echo $OUTFILE; echo "############################") &
+							time (./synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE > $DUMPFILE 2> $DUMPFILE; echo "################################"; echo $OUTFILE; echo "############################") &
 							# exit
 							# sleep 0.5
 						done
