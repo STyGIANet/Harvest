@@ -73,7 +73,7 @@ NUM_EXPS=0
 ############# 1D AllGather #############
 # NODES=(4 8 16 32 64 128)
 NODES=(64 32 16 8)
-PORTS=(2)
+PORTS=(1 2)
 ALGS=(all-gather-rd-nd all-gather-swing-nd)
 echo "Generating 1D AllGather"
 for N in ${NODES[@]};do
@@ -93,7 +93,7 @@ for N in ${NODES[@]};do
 							MESSAGE_SIZE=${MESSAGE_SIZES[$IDX]}
 							MESSAGE_NAME=${MESSAGE_NAMES[$IDX]}
 							# Default algorithm without mirroring
-							COLLECTIVE_FILE=$COLL_DIR/collective-$ALG-$N-1-$MESSAGE_NAME.json
+							COLLECTIVE_FILE=$COLL_DIR/collective-$ALG-$N-$P-$MESSAGE_NAME.json
 							OUTFILE=$TOPO_DIR/topology-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.json
 							DUMPFILE=$DUMP_DIR/topology-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.dump
 							NUM_EXPS=$(( $NUM_EXPS + 1 ))
