@@ -72,7 +72,7 @@ NUM_EXPS=0
 
 ############# 1D AllGather #############
 # NODES=(4 8 16 32 64 128)
-NODES=(128 64 32 16 8)
+NODES=(64 32 16 8)
 PORTS=(2)
 ALGS=(all-gather-rd-nd all-gather-swing-nd)
 echo "Generating 1D AllGather"
@@ -168,7 +168,7 @@ done
 ############# Bruck's #############
 
 PORTS=(1)
-NODES=(4 8 16 32 64 128)
+NODES=(4 8 16 32 64)
 ALGS=(bruckallgather-r2 bruckalltoall-r2)
 
 for N in ${NODES[@]};do
@@ -358,7 +358,7 @@ done
 
 echo "Generating Broadcast"
 
-NODES=(4 8 16 32 64 128)
+NODES=(4 8 16 32 64)
 PORTS=(1)
 ALGS=(binomial-broadcast binary-broadcast)
 

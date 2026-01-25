@@ -82,7 +82,7 @@ done
 echo "Generating Bruck's r2"
 
 ALGS=(bruckallgather-r2 bruckalltoall-r2)
-NODES=(4 8 16 32 64 128 256)
+NODES=(4 8 16 32 64)
 PORTS=(1)
 for N in ${NODES[@]};do
 	for P in ${PORTS[@]};do
@@ -100,7 +100,7 @@ done
 echo "Generating Bruck's r4"
 
 ALGS=(bruckallgather-r4 bruckalltoall-r4)
-NODES=(4 16 64 256)
+NODES=(4 16 64)
 PORTS=(4)
 for N in ${NODES[@]};do
 	for P in ${PORTS[@]};do
@@ -161,7 +161,7 @@ done
 
 echo "Generating Broadcast"
 
-NODES=(4 8 16 32 64 128 256)
+NODES=(4 8 16 32 64)
 PORTS=(1)
 ALGS=(binomial-broadcast binary-broadcast)
 
