@@ -56,11 +56,13 @@ for N in ${NODES[@]};do
 	done
 done
 
+############# All-to-All #############
+
 NODES=(8 16 32 64)
 PORTS=(1 2 3 4 8)
 ALGS=(all-to-all-nd direct-all-to-all)
 
-echo "Generating 1D AllGather"
+echo "Generating All to All"
 
 for N in ${NODES[@]};do
 	for P in ${PORTS[@]};do
@@ -81,7 +83,7 @@ echo "Generating Bruck's r2"
 
 ALGS=(bruckallgather-r2 bruckalltoall-r2)
 NODES=(4 8 16 32 64 128 256)
-PORTS=(1 2)
+PORTS=(1)
 for N in ${NODES[@]};do
 	for P in ${PORTS[@]};do
 		for ALG in ${ALGS[@]};do
@@ -99,7 +101,7 @@ echo "Generating Bruck's r4"
 
 ALGS=(bruckallgather-r4 bruckalltoall-r4)
 NODES=(4 16 64 256)
-PORTS=(1 2 4)
+PORTS=(4)
 for N in ${NODES[@]};do
 	for P in ${PORTS[@]};do
 		for ALG in ${ALGS[@]};do

@@ -13,8 +13,8 @@
 
 static constexpr double INF_D = std::numeric_limits<double>::infinity();
 
-static constexpr int K_PATHS = 8;
-static constexpr int MAX_PATH_LEN = 64; // It is a bit extreme but fine for now..
+int K_PATHS = 8;
+int MAX_PATH_LEN = 64; // It is a bit extreme but fine for now..
 
 DPScheduler::DPScheduler(
   const std::vector<std::vector<Demand>>& steps,
@@ -46,7 +46,9 @@ DPScheduler::DPScheduler(
   relaxation_(relaxation),
   logging_(logging),
   rd_(rd),
-  collective_(collective) {}
+  collective_(collective) {
+    MAX_PATH_LEN = n_;
+  }
 
 int DPScheduler::ringNext(int u) const { return (u + 1) % n_; }
 int DPScheduler::ringPrev(int u) const { return (u - 1 + n_) % n_; }
