@@ -125,6 +125,7 @@ private:
   ) const;
 
   std::pair<Topology, double> completion_time(int a, int b);
+  std::pair<Topology, double> completion_time_all_to_all(int a, int b);
   std::vector<int> torusNeighbors3D(int u) const;
   int kautzLabelLength() const;
   std::vector<int> kautzUnrank(int id, int k) const;
