@@ -293,7 +293,7 @@ Topology DPScheduler::base_topology() const {
         if (std::find(nbrs.begin(), nbrs.end(), v) != nbrs.end()) val = 1;
       }
       else if (collective_ == "all-to-all-nd" && d_ >= 2) {
-        auto nbrs = deBruijnNeighbors(u);
+        auto nbrs = d_>=3? expanderNeighbors(u) : deBruijnNeighbors(u);
         if (std::find(nbrs.begin(), nbrs.end(), v) != nbrs.end()) val = 1;
       }
       else if ((collective_.rfind("bruckallgather", 0) == 0 || collective_.rfind("bruckalltoall", 0) == 0) && d_ >= 2) {
@@ -1201,11 +1201,11 @@ std::pair<Topology, double> DPScheduler::completion_time_all_to_all(int a, int b
       demandST.reserve(128);
 
       for (int i = a; i <= b; ++i) {
-        double inv = 1.0 / (double)chunksizes_[(size_t)i - 1];
+        double inv = (1.0 / (double)chunksizes_[(size_t)i - 1])/((double)((s_+1)*(b - a + 1))/(s_));
 
         for (const auto& dmd : steps_[(size_t)i - 1]) {
           Pair st{dmd.s, dmd.t};
-          double dint = (double)dmd.bits * inv / (double)(b - a + 1);
+          double dint = (double)dmd.bits * inv;
           demandST[st] += dint;
         }
       }
