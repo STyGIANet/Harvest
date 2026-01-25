@@ -37,7 +37,7 @@ MESSAGE_SIZES=(1024 4096 16384 65536 262144 1048576 \
 MESSAGE_NAMES=(1KB 4KB 16KB 64KB 256KB 1MB 4MB 16MB \
 64MB 256MB 1GB)
 
-LOGGING=$2
+LOGGING=0
 RELAXATION=0
 #####################################################################################################
 # What changes in the collective file: Message size, Number of nodes, Ports (or dimensions)
