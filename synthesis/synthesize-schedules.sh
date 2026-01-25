@@ -65,10 +65,10 @@ cd $SCRIPT_DIR
 ./buildCpp.sh
 NUM_EXPS=0
 
-while [[ $(ps aux | grep 'AstraSimNetwork-optimized' | wc -l) -gt 1 ]];do
-	sleep 2
-	echo "waiting for astra-sim experiments to finish, not to overload the system..."
-done
+# while [[ $(ps aux | grep 'AstraSimNetwork-optimized' | wc -l) -gt 1 ]];do
+# 	sleep 2
+# 	echo "waiting for astra-sim experiments to finish, not to overload the system..."
+# done
 
 ############# 1D AllGather #############
 # NODES=(4 8 16 32 64 128)
@@ -100,10 +100,10 @@ for N in ${NODES[@]};do
 								sleep 2
 								echo "waiting at $NUM_EXPS..."
 							done
-							while [[ $(ps aux | grep 'AstraSimNetwork-optimized' | wc -l) -gt 1 ]];do
-								sleep 2
-								echo "waiting for astra-sim experiments to finish, not to overload the system..."
-							done
+							# while [[ $(ps aux | grep 'AstraSimNetwork-optimized' | wc -l) -gt 1 ]];do
+							# 	sleep 2
+							# 	echo "waiting for astra-sim experiments to finish, not to overload the system..."
+							# done
 							echo "synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE"
 							time (./synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE > $DUMPFILE 2> $DUMPFILE; echo "################################"; echo $OUTFILE; echo "############################") &
 							# exit
@@ -148,10 +148,10 @@ for N in ${NODES[@]};do
 								sleep 2
 								echo "waiting at $NUM_EXPS..."
 							done
-							while [[ $(ps aux | grep 'AstraSimNetwork-optimized' | wc -l) -gt 1 ]];do
-								sleep 2
-								echo "waiting for astra-sim experiments to finish, not to overload the system..."
-							done
+							# while [[ $(ps aux | grep 'AstraSimNetwork-optimized' | wc -l) -gt 1 ]];do
+							# 	sleep 2
+							# 	echo "waiting for astra-sim experiments to finish, not to overload the system..."
+							# done
 							echo "synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE"
 							time (./synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE > $DUMPFILE 2> $DUMPFILE; echo "################################"; echo $OUTFILE; echo "############################") &
 							# exit
@@ -195,10 +195,10 @@ for N in ${NODES[@]};do
 								sleep 2
 								echo "waiting at $NUM_EXPS..."
 							done
-							while [[ $(ps aux | grep 'AstraSimNetwork-optimized' | wc -l) -gt 1 ]];do
-								sleep 2
-								echo "waiting for astra-sim experiments to finish, not to overload the system..."
-							done
+							# while [[ $(ps aux | grep 'AstraSimNetwork-optimized' | wc -l) -gt 1 ]];do
+							# 	sleep 2
+							# 	echo "waiting for astra-sim experiments to finish, not to overload the system..."
+							# done
 							echo "synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE"
 							time (./synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE > $DUMPFILE 2> $DUMPFILE; echo "################################"; echo $OUTFILE; echo "############################") &
 							# exit
@@ -240,10 +240,10 @@ for N in ${NODES[@]};do
 								sleep 2
 								echo "waiting at $NUM_EXPS..."
 							done
-							while [[ $(ps aux | grep 'AstraSimNetwork-optimized' | wc -l) -gt 1 ]];do
-								sleep 2
-								echo "waiting for astra-sim experiments to finish, not to overload the system..."
-							done
+							# while [[ $(ps aux | grep 'AstraSimNetwork-optimized' | wc -l) -gt 1 ]];do
+							# 	sleep 2
+							# 	echo "waiting for astra-sim experiments to finish, not to overload the system..."
+							# done
 							echo "synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE"
 							time (./synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE > $DUMPFILE 2> $DUMPFILE; echo "################################"; echo $OUTFILE; echo "############################") &
 							# exit
@@ -289,10 +289,10 @@ for N in ${NODES[@]};do
 								sleep 2
 								echo "waiting at $NUM_EXPS..."
 							done
-							while [[ $(ps aux | grep 'AstraSimNetwork-optimized' | wc -l) -gt 1 ]];do
-								sleep 2
-								echo "waiting for astra-sim experiments to finish, not to overload the system..."
-							done
+							# while [[ $(ps aux | grep 'AstraSimNetwork-optimized' | wc -l) -gt 1 ]];do
+							# 	sleep 2
+							# 	echo "waiting for astra-sim experiments to finish, not to overload the system..."
+							# done
 							echo "synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE"
 							time (./synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE > $DUMPFILE 2> $DUMPFILE; echo "################################"; echo $OUTFILE; echo "############################") &
 							# exit
@@ -337,10 +337,10 @@ for N in ${NODES[@]};do
 								sleep 2
 								echo "waiting at $NUM_EXPS..."
 							done
-							while [[ $(ps aux | grep 'AstraSimNetwork-optimized' | wc -l) -gt 1 ]];do
-								sleep 2
-								echo "waiting for astra-sim experiments to finish, not to overload the system..."
-							done
+							# while [[ $(ps aux | grep 'AstraSimNetwork-optimized' | wc -l) -gt 1 ]];do
+							# 	sleep 2
+							# 	echo "waiting for astra-sim experiments to finish, not to overload the system..."
+							# done
 							echo "synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE"
 							time (./synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE > $DUMPFILE 2> $DUMPFILE; echo "################################"; echo $OUTFILE; echo "############################") &
 							# exit
@@ -386,10 +386,10 @@ for N in ${NODES[@]};do
 								sleep 2
 								echo "waiting at $NUM_EXPS..."
 							done
-							while [[ $(ps aux | grep 'AstraSimNetwork-optimized' | wc -l) -gt 1 ]];do
-								sleep 2
-								echo "waiting for astra-sim experiments to finish, not to overload the system..."
-							done
+							# while [[ $(ps aux | grep 'AstraSimNetwork-optimized' | wc -l) -gt 1 ]];do
+							# 	sleep 2
+							# 	echo "waiting for astra-sim experiments to finish, not to overload the system..."
+							# done
 							echo "synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE"
 							time (./synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE > $DUMPFILE 2> $DUMPFILE; echo "################################"; echo $OUTFILE; echo "############################") &
 							# exit
