@@ -27,7 +27,7 @@ BANDWIDTHS=(100 200 400 800 640 1200 2400 3600 7200)
 # 10ns e.g., Sirius, or some opto-electrical lithium niobate switches in the range 10 to 300ns
 # 10us e.g., Rotornet
 # 1ms and beyond e.g., 3-D MEMS
-ALPHARS=(10 100 1000 10000 100000 1000000 10000000)
+ALPHARS=(10 100 1000 10000 100000 1000000 100000000)
 # Can widely vary based on the system design, hop processing delays, and even cable lengths
 DELTAS=(10 50 100 500 1000 5000 10000)
 
@@ -92,7 +92,8 @@ for N in ${NODES[@]};do
 						for IDX in ${!MESSAGE_SIZES[@]};do
 							MESSAGE_SIZE=${MESSAGE_SIZES[$IDX]}
 							MESSAGE_NAME=${MESSAGE_NAMES[$IDX]}
-							COLLECTIVE_FILE=$COLL_DIR/collective-$ALG-$N-$P-$MESSAGE_NAME.json
+							# Default algorithm without mirroring
+							COLLECTIVE_FILE=$COLL_DIR/collective-$ALG-$N-1-$MESSAGE_NAME.json
 							OUTFILE=$TOPO_DIR/topology-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.json
 							DUMPFILE=$DUMP_DIR/topology-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.dump
 							NUM_EXPS=$(( $NUM_EXPS + 1 ))
@@ -131,6 +132,10 @@ for N in ${NODES[@]};do
 			DELTA=${DELTAS[$ALPHA_DELTA_ID]}
 			for ALPHA_R in ${ALPHARS[@]};do
 				for P in ${PORTS[@]};do
+					if [[ $N == $P ]];then
+						echo "N=P continuing... $N $P"
+						continue
+					fi
 					for ALG in ${ALGS[@]};do
 						if [[ $ALG == "all-gather-rd-nd" ]];then
 							RD=0
