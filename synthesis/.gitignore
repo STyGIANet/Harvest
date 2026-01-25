@@ -7,3 +7,4 @@ collectives/
 topologies/
 synthesize-schedule
 dump/
+synthesis_all2all.py

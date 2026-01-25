@@ -1099,12 +1099,19 @@ std::pair<Topology, double> DPScheduler::completion_time_all_to_all(int a, int b
 
   // Ti is basically transmission time. So lets interpret it in nanosecond, or in seconds based on our convinience
   double SCALE = 1; // Makes Ti in nanoseconds
-  for (int i = 1; i <= s_; ++i) {
-    double bits = getDemandStep(i);
-    if (beta_ * bits / d_ > 1e3){
-      SCALE = 1e-9; // Makes Ti in seconds
-    }
+  double checkbits = 0;
+  for (int i = a; i <= b; ++i) {
+    checkbits += getDemandStep(i);
   }
+  if (beta_ * checkbits / d_ > 1e3){
+    SCALE = 1e-9; // Makes Ti in seconds
+  }
+  // for (int i = 1; i <= s_; ++i) {
+  //   double bits = getDemandStep(i);
+  //   if (beta_ * bits / d_ > 1e3){
+  //     SCALE = 1e-9; // Makes Ti in seconds
+  //   }
+  // }
   std::cout << "SCALE " << SCALE << std::endl;
 
   for (int search = 0; search < topoSpace; ++search) {
@@ -1353,12 +1360,12 @@ std::pair<Topology, double> DPScheduler::completion_time_all_to_all(int a, int b
         std::cout << "Done in " << std::chrono::duration<double>(t1 - t0).count() << " cost " << uint32_t (model.get(GRB_DoubleAttr_ObjVal)/SCALE) << std::endl;
       // }
 
-      if (logging_) {
+      // if (logging_) {
         std::cout << "Status " << model.get(GRB_IntAttr_Status) << "\n";
         std::cout << "ObjVal " << uint32_t (model.get(GRB_DoubleAttr_ObjVal)/SCALE) << "\n";
         // std::cout << "IterCount " << model.get(GRB_DoubleAttr_IterCount) << "\n";
         // std::cout << "BarIterCount " << model.get(GRB_IntAttr_BarIterCount) << "\n";
-      }
+      // }
 
       int status = model.get(GRB_IntAttr_Status);
       if (status != GRB_OPTIMAL && status != GRB_SUBOPTIMAL) {
