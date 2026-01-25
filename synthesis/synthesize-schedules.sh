@@ -65,6 +65,10 @@ cd $SCRIPT_DIR
 ./buildCpp.sh
 NUM_EXPS=0
 
+while [[ $(ps aux | grep 'AstraSimNetwork-optimized' | wc -l) -gt 1 ]];do
+	sleep 2
+	echo "waiting for astra-sim experiments to finish, not to overload the system..."
+done
 
 ############# 1D AllGather #############
 # NODES=(4 8 16 32 64 128)
@@ -95,6 +99,10 @@ for N in ${NODES[@]};do
 							while [[ $(ps aux | grep '/bin/bash ./synthesize-schedule' | wc -l) -gt $NUM_PARALLEL ]];do
 								sleep 2
 								echo "waiting at $NUM_EXPS..."
+							done
+							while [[ $(ps aux | grep 'AstraSimNetwork-optimized' | wc -l) -gt 1 ]];do
+								sleep 2
+								echo "waiting for astra-sim experiments to finish, not to overload the system..."
 							done
 							echo "synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE"
 							time (./synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE > $DUMPFILE 2> $DUMPFILE; echo "################################"; echo $OUTFILE; echo "############################") &
@@ -140,6 +148,10 @@ for N in ${NODES[@]};do
 								sleep 2
 								echo "waiting at $NUM_EXPS..."
 							done
+							while [[ $(ps aux | grep 'AstraSimNetwork-optimized' | wc -l) -gt 1 ]];do
+								sleep 2
+								echo "waiting for astra-sim experiments to finish, not to overload the system..."
+							done
 							echo "synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE"
 							time (./synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE > $DUMPFILE 2> $DUMPFILE; echo "################################"; echo $OUTFILE; echo "############################") &
 							# exit
@@ -183,6 +195,10 @@ for N in ${NODES[@]};do
 								sleep 2
 								echo "waiting at $NUM_EXPS..."
 							done
+							while [[ $(ps aux | grep 'AstraSimNetwork-optimized' | wc -l) -gt 1 ]];do
+								sleep 2
+								echo "waiting for astra-sim experiments to finish, not to overload the system..."
+							done
 							echo "synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE"
 							time (./synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE > $DUMPFILE 2> $DUMPFILE; echo "################################"; echo $OUTFILE; echo "############################") &
 							# exit
@@ -223,6 +239,10 @@ for N in ${NODES[@]};do
 							while [[ $(ps aux | grep '/bin/bash ./synthesize-schedule' | wc -l) -gt $NUM_PARALLEL ]];do
 								sleep 2
 								echo "waiting at $NUM_EXPS..."
+							done
+							while [[ $(ps aux | grep 'AstraSimNetwork-optimized' | wc -l) -gt 1 ]];do
+								sleep 2
+								echo "waiting for astra-sim experiments to finish, not to overload the system..."
 							done
 							echo "synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE"
 							time (./synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE > $DUMPFILE 2> $DUMPFILE; echo "################################"; echo $OUTFILE; echo "############################") &
@@ -269,6 +289,10 @@ for N in ${NODES[@]};do
 								sleep 2
 								echo "waiting at $NUM_EXPS..."
 							done
+							while [[ $(ps aux | grep 'AstraSimNetwork-optimized' | wc -l) -gt 1 ]];do
+								sleep 2
+								echo "waiting for astra-sim experiments to finish, not to overload the system..."
+							done
 							echo "synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE"
 							time (./synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE > $DUMPFILE 2> $DUMPFILE; echo "################################"; echo $OUTFILE; echo "############################") &
 							# exit
@@ -312,6 +336,10 @@ for N in ${NODES[@]};do
 							while [[ $(ps aux | grep '/bin/bash ./synthesize-schedule' | wc -l) -gt $NUM_PARALLEL ]];do
 								sleep 2
 								echo "waiting at $NUM_EXPS..."
+							done
+							while [[ $(ps aux | grep 'AstraSimNetwork-optimized' | wc -l) -gt 1 ]];do
+								sleep 2
+								echo "waiting for astra-sim experiments to finish, not to overload the system..."
 							done
 							echo "synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE"
 							time (./synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE > $DUMPFILE 2> $DUMPFILE; echo "################################"; echo $OUTFILE; echo "############################") &
@@ -358,6 +386,10 @@ for N in ${NODES[@]};do
 								sleep 2
 								echo "waiting at $NUM_EXPS..."
 							done
+							while [[ $(ps aux | grep 'AstraSimNetwork-optimized' | wc -l) -gt 1 ]];do
+								sleep 2
+								echo "waiting for astra-sim experiments to finish, not to overload the system..."
+							done
 							echo "synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE"
 							time (./synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE > $DUMPFILE 2> $DUMPFILE; echo "################################"; echo $OUTFILE; echo "############################") &
 							# exit
@@ -371,42 +403,3 @@ for N in ${NODES[@]};do
 done
 
 echo "Total $NUM_EXPS experiments"
-# echo "Generating 2D AllGather"
-
-# DIMS=(4x4 8x4 16x4 8x8 16x8)
-# PORTS=(1 2 4)
-# ALGS=(all-gather-rd-nd all-gather-swing-nd)
-
-# for N in ${DIMS[@]};do
-# 	for P in ${PORTS[@]};do
-# 		for ALG in ${ALGS[@]};do
-# 			for IDX in ${!MESSAGE_SIZES[@]};do
-# 				MESSAGE_SIZE=${MESSAGE_SIZES[$IDX]}
-# 				MESSAGE_NAME=${MESSAGE_NAMES[$IDX]}
-# 				OUTFILE=$DUMP_DIR/collective-$ALG-$N-$P-$MESSAGE_NAME.json
-# 				python3 generate-collective.py $N $MESSAGE_SIZE $P $ALG $OUTFILE
-# 			done
-# 		done
-# 	done
-# done
-
-# ############# Broadcast #############
-
-# echo "Generating Broadcast"
-
-# NODES=(4 8 16 32 64 128)
-# PORTS=(1)
-# ALGS=(binomial-broadcast binary-broadcast)
-
-# for N in ${NODES[@]};do
-# 	for P in ${PORTS[@]};do
-# 		for ALG in ${ALGS[@]};do
-# 			for IDX in ${!MESSAGE_SIZES[@]};do
-# 				MESSAGE_SIZE=${MESSAGE_SIZES[$IDX]}
-# 				MESSAGE_NAME=${MESSAGE_NAMES[$IDX]}
-# 				OUTFILE=$DUMP_DIR/collective-$ALG-$N-$P-$MESSAGE_NAME.json
-# 				python3 generate-collective.py $N $MESSAGE_SIZE $ALG $OUTFILE
-# 			done
-# 		done
-# 	done
-# done
