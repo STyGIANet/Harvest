@@ -6,3 +6,4 @@ gurobi1300/
 collectives/
 topologies/
 synthesize-schedule
+dump/
