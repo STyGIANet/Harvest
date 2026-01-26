@@ -486,6 +486,7 @@ def reduceScatterSwingMultiportND(
             # demand is what gets sent, but chunksize is used for normalization. 
             # We want demand/chunksize to represent the saturated network 
             # i.e., a value of 2 so that 2 units of bandwidth are used in the topo constructions
+            # This doesn't change anything in terms of what is sent.
             steps.append(PatternStep(id=t + 1, chunksize=chunksize/2, demand=demand))
         else:
             steps.append(PatternStep(id=t + 1, chunksize=chunksize, demand=demand))
@@ -542,7 +543,15 @@ def allGatherSwingMultiportND(
                 if bytesSent:
                     demand.append((u, v, bytesSent))
                     chunksize=bytesSent
-        steps.append(PatternStep(id=t + 1, chunksize=chunksize, demand=demand))
+        if (ports == 1):
+            # By default we will run swing on two port networks.
+            # demand is what gets sent, but chunksize is used for normalization. 
+            # We want demand/chunksize to represent the saturated network 
+            # i.e., a value of 2 so that 2 units of bandwidth are used in the topo constructions
+            # This doesn't change anything in terms of what is sent.
+            steps.append(PatternStep(id=t + 1, chunksize=chunksize/2, demand=demand))
+        else:
+            steps.append(PatternStep(id=t + 1, chunksize=chunksize, demand=demand))
     return steps
 
 def allReduceSwingMultiportND(
