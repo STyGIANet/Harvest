@@ -691,7 +691,7 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
   double SCALE = 1; // Makes Ti in nanoseconds
   for (int i = 1; i <= s_; ++i) {
     double bits = getDemandStep(i);
-    if (beta_ * bits / d_ > 1e3){
+    if (beta_ * bits / d_ > 1e5){
       SCALE = 1e-9; // Makes Ti in seconds
     }
   }
@@ -1103,7 +1103,7 @@ std::pair<Topology, double> DPScheduler::completion_time_all_to_all(int a, int b
   for (int i = a; i <= b; ++i) {
     checkbits += getDemandStep(i);
   }
-  if (beta_ * checkbits / d_ > 1e3){
+  if (beta_ * checkbits / d_ > 1e5){
     SCALE = 1e-9; // Makes Ti in seconds
   }
   // for (int i = 1; i <= s_; ++i) {
