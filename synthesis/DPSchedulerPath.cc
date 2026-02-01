@@ -1103,7 +1103,7 @@ std::pair<Topology, double> DPScheduler::completion_time_all_to_all(int a, int b
   for (int i = a; i <= b; ++i) {
     checkbits += getDemandStep(i);
   }
-  if (beta_ * checkbits / d_ > 1e3){
+  if (beta_ * checkbits / d_ > 1e2){
     SCALE = 1e-9; // Makes Ti in seconds
   }
   // for (int i = 1; i <= s_; ++i) {
@@ -1177,7 +1177,7 @@ std::pair<Topology, double> DPScheduler::completion_time_all_to_all(int a, int b
       model.set(GRB_IntParam_Method, 2);
       model.set(GRB_IntParam_Presolve, 2);
       model.set(GRB_IntParam_BarHomogeneous, 0);
-      model.set(GRB_DoubleParam_BarConvTol, 1e-6);
+      model.set(GRB_DoubleParam_BarConvTol, 1e-9);
       model.set(GRB_IntParam_NumericFocus, 0);
       model.set(GRB_IntParam_Crossover, 0);
 
@@ -1366,6 +1366,7 @@ std::pair<Topology, double> DPScheduler::completion_time_all_to_all(int a, int b
         // std::cout << "IterCount " << model.get(GRB_DoubleAttr_IterCount) << "\n";
         // std::cout << "BarIterCount " << model.get(GRB_IntAttr_BarIterCount) << "\n";
       // }
+	std::cout << "Tval " << T[(size_t)a].get(GRB_DoubleAttr_X) << std::endl;
 
       int status = model.get(GRB_IntAttr_Status);
       if (status != GRB_OPTIMAL && status != GRB_SUBOPTIMAL) {
