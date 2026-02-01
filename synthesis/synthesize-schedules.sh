@@ -267,7 +267,7 @@ done
 echo "Generating 2D AllGather"
 
 PORTS=(4)
-NODES=(4x4 8x4 16x4 8x8 16x8)
+NODES=(4x4 8x4 16x4 8x8)
 ALGS=(all-gather-rd-nd all-gather-swing-nd)
 
 for N in ${NODES[@]};do
