@@ -35,13 +35,13 @@ MESSAGE_NAMES=(1KB 2KB 4KB 8KB 16KB 32KB 64KB 128KB 256KB 512KB 1MB 2MB 4MB 8MB 
 # What changes in the collective file: Message size, Number of nodes, Ports (or dimensions)
 # Alpha, and other parameters are input to the topology synthesis, not for the collective itself
 
-############# 1D AllGather #############
+############# 1D AllReduce #############
 
 NODES=(4 8 16 32 64 128 256)
 PORTS=(1 2)
-ALGS=(all-gather-rd-nd all-gather-swing-nd)
+ALGS=(all-reduce-rd-nd all-reduce-swing-nd)
 
-echo "Generating 1D AllGather"
+echo "Generating 1D AllReduce"
 
 for N in ${NODES[@]};do
 	for P in ${PORTS[@]};do
@@ -115,13 +115,13 @@ for N in ${NODES[@]};do
 	done
 done
 
-############# 2D AllGather #############
+############# 2D AllReduce #############
 
-echo "Generating 2D AllGather"
+echo "Generating 2D AllReduce"
 
 DIMS=(4x4 8x4 16x4 8x8 16x8)
 PORTS=(4)
-ALGS=(all-gather-rd-nd all-gather-swing-nd)
+ALGS=(all-reduce-rd-nd all-reduce-swing-nd)
 
 for N in ${DIMS[@]};do
 	for P in ${PORTS[@]};do
@@ -136,13 +136,13 @@ for N in ${DIMS[@]};do
 	done
 done
 
-############# 3D AllGather #############
+############# 3D AllReduce #############
 
-echo "Generating 3D AllGather"
+echo "Generating 3D AllReduce"
 
 DIMS=(4x4x4 8x4x2 16x2x2)
 PORTS=(6)
-ALGS=(all-gather-rd-nd all-gather-swing-nd)
+ALGS=(all-reduce-rd-nd all-reduce-swing-nd)
 
 for N in ${DIMS[@]};do
 	for P in ${PORTS[@]};do
