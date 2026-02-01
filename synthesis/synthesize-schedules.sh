@@ -77,6 +77,7 @@ PORTS=(1 2)
 ALGS=(all-gather-rd-nd all-gather-swing-nd)
 echo "Generating 1D AllGather"
 for N in ${NODES[@]};do
+	continue
 	for BANDWIDTH in ${BANDWIDTHS[@]};do
 		for ALPHA_DELTA_ID in ${!ALPHAS[@]};do
 			ALPHA=${ALPHAS[$ALPHA_DELTA_ID]}

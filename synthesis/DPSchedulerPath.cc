@@ -1107,7 +1107,7 @@ std::pair<Topology, double> DPScheduler::completion_time_all_to_all(int a, int b
   if (beta_ * checkbits / d_ > 1e2){
     SCALE = 1e-6; // Makes Ti in seconds
   }
-  // SCALE=1;
+  SCALE = 1e-6;
   // for (int i = 1; i <= s_; ++i) {
   //   double bits = getDemandStep(i);
   //   if (beta_ * bits / d_ > 1e3){
