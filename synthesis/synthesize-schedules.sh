@@ -70,14 +70,13 @@ NUM_EXPS=0
 # 	echo "waiting for astra-sim experiments to finish, not to overload the system..."
 # done
 
-############# 1D AllGather #############
+############# 1D AllReduce #############
 # NODES=(4 8 16 32 64 128)
 NODES=(64 32 16 8)
 PORTS=(1 2)
-ALGS=(all-gather-rd-nd all-gather-swing-nd)
-echo "Generating 1D AllGather"
+ALGS=(all-reduce-rd-nd all-reduce-swing-nd)
+echo "Generating 1D AllReduce"
 for N in ${NODES[@]};do
-	continue
 	for BANDWIDTH in ${BANDWIDTHS[@]};do
 		for ALPHA_DELTA_ID in ${!ALPHAS[@]};do
 			ALPHA=${ALPHAS[$ALPHA_DELTA_ID]}
@@ -85,7 +84,7 @@ for N in ${NODES[@]};do
 			for ALPHA_R in ${ALPHARS[@]};do
 				for P in ${PORTS[@]};do
 					for ALG in ${ALGS[@]};do
-						if [[ $ALG == "all-gather-rd-nd" ]];then
+						if [[ $ALG == "all-reduce-rd-nd" ]];then
 							RD=0
 						else
 							RD=0
@@ -138,7 +137,7 @@ for N in ${NODES[@]};do
 						continue
 					fi
 					for ALG in ${ALGS[@]};do
-						if [[ $ALG == "all-gather-rd-nd" ]];then
+						if [[ $ALG == "all-reduce-rd-nd" ]];then
 							RD=0
 						else
 							RD=0
@@ -185,7 +184,7 @@ for N in ${NODES[@]};do
 			for ALPHA_R in ${ALPHARS[@]};do
 				for P in ${PORTS[@]};do
 					for ALG in ${ALGS[@]};do
-						if [[ $ALG == "all-gather-rd-nd" ]];then
+						if [[ $ALG == "all-reduce-rd-nd" ]];then
 							RD=0
 						else
 							RD=0
@@ -230,7 +229,7 @@ for N in ${NODES[@]};do
 			for ALPHA_R in ${ALPHARS[@]};do
 				for P in ${PORTS[@]};do
 					for ALG in ${ALGS[@]};do
-						if [[ $ALG == "all-gather-rd-nd" ]];then
+						if [[ $ALG == "all-reduce-rd-nd" ]];then
 							RD=0
 						else
 							RD=0
@@ -264,12 +263,12 @@ done
 
 
 
-# ############# 2D AllGather #############
-echo "Generating 2D AllGather"
+# ############# 2D AllReduce #############
+echo "Generating 2D AllReduce"
 
 PORTS=(4)
 NODES=(4x4 8x4 16x4 8x8)
-ALGS=(all-gather-rd-nd all-gather-swing-nd)
+ALGS=(all-reduce-rd-nd all-reduce-swing-nd)
 
 for N in ${NODES[@]};do
 	for BANDWIDTH in ${BANDWIDTHS[@]};do
@@ -279,7 +278,7 @@ for N in ${NODES[@]};do
 			for ALPHA_R in ${ALPHARS[@]};do
 				for P in ${PORTS[@]};do
 					for ALG in ${ALGS[@]};do
-						if [[ $ALG == "all-gather-rd-nd" ]];then
+						if [[ $ALG == "all-reduce-rd-nd" ]];then
 							RD=0
 						else
 							RD=0
@@ -311,12 +310,12 @@ for N in ${NODES[@]};do
 	done
 done
 
-############# 3D AllGather #############
-echo "Generating 2D AllGather"
+############# 3D AllReduce #############
+echo "Generating 2D AllReduce"
 
 PORTS=(6)
 NODES=(4x4x4 8x4x2 16x2x2)
-ALGS=(all-gather-rd-nd all-gather-swing-nd)
+ALGS=(all-reduce-rd-nd all-reduce-swing-nd)
 
 
 for N in ${NODES[@]};do
@@ -327,7 +326,7 @@ for N in ${NODES[@]};do
 			for ALPHA_R in ${ALPHARS[@]};do
 				for P in ${PORTS[@]};do
 					for ALG in ${ALGS[@]};do
-						if [[ $ALG == "all-gather-rd-nd" ]];then
+						if [[ $ALG == "all-reduce-rd-nd" ]];then
 							RD=0
 						else
 							RD=0
@@ -376,7 +375,7 @@ for N in ${NODES[@]};do
 			for ALPHA_R in ${ALPHARS[@]};do
 				for P in ${PORTS[@]};do
 					for ALG in ${ALGS[@]};do
-						if [[ $ALG == "all-gather-rd-nd" ]];then
+						if [[ $ALG == "all-reduce-rd-nd" ]];then
 							RD=0
 						else
 							RD=0
