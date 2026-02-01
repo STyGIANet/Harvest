@@ -41,7 +41,7 @@ LOGGING=0
 RELAXATION=0
 #####################################################################################################
 # What changes in the collective file: Message size, Number of nodes, Ports (or dimensions)
-# Alpha, and other parameters are input to the topology synthesis, not for the collective itself
+# Alpha, and other parameters are input to the harvest synthesis, not for the collective itself
 
 # Too many experiments to iterate over every array
 # Fix some configs
@@ -94,8 +94,8 @@ for N in ${NODES[@]};do
 							MESSAGE_NAME=${MESSAGE_NAMES[$IDX]}
 							# Default algorithm without mirroring
 							COLLECTIVE_FILE=$COLL_DIR/collective-$ALG-$N-$P-$MESSAGE_NAME.json
-							OUTFILE=$TOPO_DIR/topology-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.json
-							DUMPFILE=$DUMP_DIR/topology-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.dump
+							OUTFILE=$TOPO_DIR/harvest-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.json
+							DUMPFILE=$DUMP_DIR/harvest-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.dump
 							NUM_EXPS=$(( $NUM_EXPS + 1 ))
 							while [[ $(ps aux | grep '/bin/bash ./synthesize-schedule' | wc -l) -gt $NUM_PARALLEL ]];do
 								sleep 2
@@ -146,8 +146,8 @@ for N in ${NODES[@]};do
 							MESSAGE_SIZE=${MESSAGE_SIZES[$IDX]}
 							MESSAGE_NAME=${MESSAGE_NAMES[$IDX]}
 							COLLECTIVE_FILE=$COLL_DIR/collective-$ALG-$N-$P-$MESSAGE_NAME.json
-							OUTFILE=$TOPO_DIR/topology-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.json
-							DUMPFILE=$DUMP_DIR/topology-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.dump
+							OUTFILE=$TOPO_DIR/harvest-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.json
+							DUMPFILE=$DUMP_DIR/harvest-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.dump
 							NUM_EXPS=$(( $NUM_EXPS + 1 ))
 							while [[ $(ps aux | grep '/bin/bash ./synthesize-schedule' | wc -l) -gt $NUM_PARALLEL ]];do
 								sleep 2
@@ -193,8 +193,8 @@ for N in ${NODES[@]};do
 							MESSAGE_SIZE=${MESSAGE_SIZES[$IDX]}
 							MESSAGE_NAME=${MESSAGE_NAMES[$IDX]}
 							COLLECTIVE_FILE=$COLL_DIR/collective-$ALG-$N-$P-$MESSAGE_NAME.json
-							OUTFILE=$TOPO_DIR/topology-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.json
-							DUMPFILE=$DUMP_DIR/topology-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.dump
+							OUTFILE=$TOPO_DIR/harvest-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.json
+							DUMPFILE=$DUMP_DIR/harvest-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.dump
 							NUM_EXPS=$(( $NUM_EXPS + 1 ))
 							while [[ $(ps aux | grep '/bin/bash ./synthesize-schedule' | wc -l) -gt $NUM_PARALLEL ]];do
 								sleep 2
@@ -238,8 +238,8 @@ for N in ${NODES[@]};do
 							MESSAGE_SIZE=${MESSAGE_SIZES[$IDX]}
 							MESSAGE_NAME=${MESSAGE_NAMES[$IDX]}
 							COLLECTIVE_FILE=$COLL_DIR/collective-$ALG-$N-$P-$MESSAGE_NAME.json
-							OUTFILE=$TOPO_DIR/topology-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.json
-							DUMPFILE=$DUMP_DIR/topology-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.dump
+							OUTFILE=$TOPO_DIR/harvest-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.json
+							DUMPFILE=$DUMP_DIR/harvest-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.dump
 							NUM_EXPS=$(( $NUM_EXPS + 1 ))
 							while [[ $(ps aux | grep '/bin/bash ./synthesize-schedule' | wc -l) -gt $NUM_PARALLEL ]];do
 								sleep 2
@@ -287,8 +287,8 @@ for N in ${NODES[@]};do
 							MESSAGE_SIZE=${MESSAGE_SIZES[$IDX]}
 							MESSAGE_NAME=${MESSAGE_NAMES[$IDX]}
 							COLLECTIVE_FILE=$COLL_DIR/collective-$ALG-$N-$P-$MESSAGE_NAME.json
-							OUTFILE=$TOPO_DIR/topology-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.json
-							DUMPFILE=$DUMP_DIR/topology-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.dump
+							OUTFILE=$TOPO_DIR/harvest-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.json
+							DUMPFILE=$DUMP_DIR/harvest-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.dump
 							NUM_EXPS=$(( $NUM_EXPS + 1 ))
 							while [[ $(ps aux | grep '/bin/bash ./synthesize-schedule' | wc -l) -gt $NUM_PARALLEL ]];do
 								sleep 2
@@ -335,8 +335,8 @@ for N in ${NODES[@]};do
 							MESSAGE_SIZE=${MESSAGE_SIZES[$IDX]}
 							MESSAGE_NAME=${MESSAGE_NAMES[$IDX]}
 							COLLECTIVE_FILE=$COLL_DIR/collective-$ALG-$N-$P-$MESSAGE_NAME.json
-							OUTFILE=$TOPO_DIR/topology-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.json
-							DUMPFILE=$DUMP_DIR/topology-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.dump
+							OUTFILE=$TOPO_DIR/harvest-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.json
+							DUMPFILE=$DUMP_DIR/harvest-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.dump
 							NUM_EXPS=$(( $NUM_EXPS + 1 ))
 							while [[ $(ps aux | grep '/bin/bash ./synthesize-schedule' | wc -l) -gt $NUM_PARALLEL ]];do
 								sleep 2
@@ -384,8 +384,8 @@ for N in ${NODES[@]};do
 							MESSAGE_SIZE=${MESSAGE_SIZES[$IDX]}
 							MESSAGE_NAME=${MESSAGE_NAMES[$IDX]}
 							COLLECTIVE_FILE=$COLL_DIR/collective-$ALG-$N-$P-$MESSAGE_NAME.json
-							OUTFILE=$TOPO_DIR/topology-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.json
-							DUMPFILE=$DUMP_DIR/topology-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.dump
+							OUTFILE=$TOPO_DIR/harvest-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.json
+							DUMPFILE=$DUMP_DIR/harvest-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.dump
 							NUM_EXPS=$(( $NUM_EXPS + 1 ))
 							while [[ $(ps aux | grep '/bin/bash ./synthesize-schedule' | wc -l) -gt $NUM_PARALLEL ]];do
 								sleep 2
