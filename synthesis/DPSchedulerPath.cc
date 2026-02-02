@@ -694,8 +694,10 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
     if (beta_ * bits / d_ > 1e3){
       SCALE = 1e-6; // Makes Ti in seconds
     }
+    else{
+      SCALE = 1e-5;
+    }
   }
-  SCALE = 1e-6;
   std::cout << "SCALE " << SCALE << std::endl;
 
   for (int search = 0; search < topoSpace; ++search) {
