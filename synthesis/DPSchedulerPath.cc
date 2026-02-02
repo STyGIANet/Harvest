@@ -762,10 +762,10 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
       model.set(GRB_IntParam_Threads, 1);
       model.set(GRB_IntParam_Method, 2);
       model.set(GRB_IntParam_Presolve, 2);
-      model.set(GRB_IntParam_BarHomogeneous, 1);
-      model.set(GRB_DoubleParam_BarConvTol, 1e-12);
-      model.set(GRB_IntParam_NumericFocus, 3);
-      model.set(GRB_IntParam_Crossover, 1);
+      model.set(GRB_IntParam_BarHomogeneous, 0);
+      model.set(GRB_DoubleParam_BarConvTol, 1e-6);
+      model.set(GRB_IntParam_NumericFocus, 0);
+      model.set(GRB_IntParam_Crossover, 0);
 
       int Imax = s_;
       std::vector<GRBVar> theta((size_t)Imax + 1);
