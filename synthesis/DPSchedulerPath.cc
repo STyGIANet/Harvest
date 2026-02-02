@@ -1107,10 +1107,13 @@ std::pair<Topology, double> DPScheduler::completion_time_all_to_all(int a, int b
     checkbits += getDemandStep(i);
   }
 
-  if (beta_ * checkbits / d_ > 1e2){
+  if (beta_ * checkbits / d_ > 1e3){
     SCALE = 1e-6; // Makes Ti in seconds
   }
-  SCALE = 1e-6;
+  else{
+    SCALE = 1e-5;
+  }
+  // SCALE = 1e-6;
   // for (int i = 1; i <= s_; ++i) {
   //   double bits = getDemandStep(i);
   //   if (beta_ * bits / d_ > 1e3){
@@ -1181,10 +1184,10 @@ std::pair<Topology, double> DPScheduler::completion_time_all_to_all(int a, int b
       model.set(GRB_IntParam_Threads, 1);
       model.set(GRB_IntParam_Method, 2);
       model.set(GRB_IntParam_Presolve, 2);
-      model.set(GRB_IntParam_BarHomogeneous, 1);
-      model.set(GRB_DoubleParam_BarConvTol, 1e-12);
-      model.set(GRB_IntParam_NumericFocus, 3);
-      model.set(GRB_IntParam_Crossover, 1);
+      model.set(GRB_IntParam_BarHomogeneous, 0);
+      model.set(GRB_DoubleParam_BarConvTol, 1e-6);
+      model.set(GRB_IntParam_NumericFocus, 0);
+      model.set(GRB_IntParam_Crossover, 0);
 
       // Just need one variable, but just doing it the easy way, keeping the same structure as others i.e., copy paste and modify :P
       int Imax = s_;

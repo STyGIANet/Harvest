@@ -77,6 +77,7 @@ PORTS=(1 2)
 ALGS=(all-reduce-rd-nd all-reduce-swing-nd)
 echo "Generating 1D AllReduce"
 for N in ${NODES[@]};do
+	break;
 	for BANDWIDTH in ${BANDWIDTHS[@]};do
 		for ALPHA_DELTA_ID in ${!ALPHAS[@]};do
 			ALPHA=${ALPHAS[$ALPHA_DELTA_ID]}
@@ -169,7 +170,7 @@ for N in ${NODES[@]};do
 	done
 done
 
-
+exit
 ############# Bruck's #############
 
 PORTS=(1)
