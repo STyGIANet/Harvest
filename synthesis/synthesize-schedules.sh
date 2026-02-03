@@ -119,6 +119,60 @@ for N in ${NODES[@]};do
 done
 
 ############# All-to-All #############
+
+echo "Generating All to All"
+PORTS=(1)
+NODES=(64 32 16 8)
+ALGS=(all-to-all)
+
+for N in ${NODES[@]};do
+	break;
+	for BANDWIDTH in ${BANDWIDTHS[@]};do
+		# for ALPHA_DELTA_ID in ${!ALPHAS[@]};do
+		# only 500 & 500
+		for ALPHA_DELTA_ID in 2;do
+			ALPHA=${ALPHAS[$ALPHA_DELTA_ID]}
+			DELTA=${DELTAS[$ALPHA_DELTA_ID]}
+			for P in ${PORTS[@]};do
+				for ALPHA_R in ${ALPHARS[@]};do
+					if [[ $N == $P ]];then
+						echo "N=P continuing... $N $P"
+						continue
+					fi
+					for ALG in ${ALGS[@]};do
+						if [[ $ALG == "all-reduce-rd-nd" ]];then
+							RD=0
+						else
+							RD=0
+						fi
+						for IDX in ${!MESSAGE_SIZES[@]};do
+							MESSAGE_SIZE=${MESSAGE_SIZES[$IDX]}
+							MESSAGE_NAME=${MESSAGE_NAMES[$IDX]}
+							COLLECTIVE_FILE=$COLL_DIR/collective-$ALG-$N-$P-$MESSAGE_NAME.json
+							OUTFILE=$TOPO_DIR/harvest-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.json
+							DUMPFILE=$DUMP_DIR/harvest-$ALG-$N-$P-$MESSAGE_NAME-$BANDWIDTH-$ALPHA-$DELTA-$ALPHA_R-$RELAXATION.dump
+							NUM_EXPS=$(( $NUM_EXPS + 1 ))
+							while [[ $(ps aux | grep '/bin/bash ./synthesize-schedule' | wc -l) -gt $NUM_PARALLEL ]];do
+								sleep 2
+								echo "waiting at $NUM_EXPS..."
+							done
+							# while [[ $(ps aux | grep 'AstraSimNetwork-optimized' | wc -l) -gt 1 ]];do
+							# 	sleep 2
+							# 	echo "waiting for astra-sim experiments to finish, not to overload the system..."
+							# done
+							echo "synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE"
+							time (./synthesize-schedule $COLLECTIVE_FILE $P $BANDWIDTH $ALPHA $DELTA $ALPHA_R $LOGGING $RELAXATION $RD $OUTFILE > $DUMPFILE 2> $DUMPFILE; echo "################################"; echo $OUTFILE; echo "############################") &
+							# exit
+							# sleep 0.5
+						done
+					done
+				done
+			done
+		done
+	done
+done
+
+
 echo "Generating All to All"
 PORTS=(1 2 3 4 8)
 NODES=(64 32 16 8)
