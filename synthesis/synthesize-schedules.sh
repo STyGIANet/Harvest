@@ -131,8 +131,8 @@ for N in ${NODES[@]};do
 		for ALPHA_DELTA_ID in 2;do
 			ALPHA=${ALPHAS[$ALPHA_DELTA_ID]}
 			DELTA=${DELTAS[$ALPHA_DELTA_ID]}
-			for ALPHA_R in ${ALPHARS[@]};do
-				for P in ${PORTS[@]};do
+			for P in ${PORTS[@]};do
+				for ALPHA_R in ${ALPHARS[@]};do
 					if [[ $N == $P ]];then
 						echo "N=P continuing... $N $P"
 						continue
