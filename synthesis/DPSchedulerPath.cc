@@ -552,10 +552,10 @@ double DPScheduler::getDemandStep(int i){
 }
 
 std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
-  if (collective_ == "all-to-all-nd"){
-    std::cout << "Error: Use the completion_time_all_to_all function for all to all" << std::endl;
-    exit(1);
-  }
+  // if (collective_ == "all-to-all-nd"){
+  //   std::cout << "Error: Use the completion_time_all_to_all function for all to all" << std::endl;
+  //   exit(1);
+  // }
   std::pair<int,int> key{a,b};
   auto itc = cache_.find(key);
   if (itc != cache_.end()) return itc->second;
@@ -571,7 +571,7 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
   Topology base = base_topology();
   Topology baseRing = base_ring();
 
-  if ((collective_.rfind("bruckallgather", 0) == 0 || collective_.rfind("bruckalltoall", 0) == 0) && d_>=2){
+  if ((collective_.rfind("bruckallgather", 0) == 0 || collective_.rfind("bruckalltoall", 0) == 0 || collective_ == "all-to-all-nd") && d_>=2){
     Topology topo;
     topo.reserve((size_t)n_ * (size_t)(n_ - 1));
     for (int u = 0; u < n_; ++u) {
@@ -614,6 +614,8 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
       }
     }
     Topology toUse = base;
+    if (collective_ == "all-to-all-nd")
+      toUse = baseRing;
     for (const auto& kv : toUse) {
       const Edge& e = kv.first;
       int val = kv.second;
@@ -643,6 +645,8 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
       break;
     if (i > (int)steps_.size()) 
       continue;
+    if (collective_ == "all-to-all-nd" && d_>=2)
+      break;
 
     Topology temp;
     temp.reserve((size_t)n_ * (size_t)(n_ - 1));
@@ -695,7 +699,7 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
       SCALE = 1e-6; // Makes Ti in seconds
     }
     else{
-      SCALE = 1e-5;
+      SCALE = 1e-3;
     }
   }
   std::cout << "SCALE " << SCALE << std::endl;
@@ -897,6 +901,7 @@ std::pair<Topology, double> DPScheduler::completion_time(int a, int b) {
         // std::cout << "IterCount " << model.get(GRB_DoubleAttr_IterCount) << "\n";
         // std::cout << "BarIterCount " << model.get(GRB_IntAttr_BarIterCount) << "\n";
       // }
+      std::cout << "Tval " << T[(size_t)a].get(GRB_DoubleAttr_X) << std::endl;
 
       int status = model.get(GRB_IntAttr_Status);
       if (status != GRB_OPTIMAL && status != GRB_SUBOPTIMAL) {
@@ -1141,7 +1146,7 @@ std::pair<Topology, double> DPScheduler::completion_time_all_to_all(int a, int b
     }
 
     std::unordered_set<Pair, PairHash> stSet;
-    stSet.reserve(256);
+    stSet.reserve(4096);
     for (int i = a; i <= b; ++i) {
       for (const auto& dmd : steps_[(size_t)i - 1]) {
         stSet.insert({dmd.s, dmd.t});
@@ -1149,7 +1154,7 @@ std::pair<Topology, double> DPScheduler::completion_time_all_to_all(int a, int b
     }
 
     std::unordered_map<int, std::unordered_set<int>> bySource;
-    bySource.reserve(64);
+    bySource.reserve(4096);
     for (const auto& st : stSet) {
       bySource[st.first].insert(st.second);
     }
@@ -1215,7 +1220,7 @@ std::pair<Topology, double> DPScheduler::completion_time_all_to_all(int a, int b
         }
       }
       std::unordered_map<Pair, double, PairHash> demandST;
-      demandST.reserve(128);
+      demandST.reserve(4096);
 
       for (int i = a; i <= b; ++i) {
         double inv = (1.0 / (double)chunksizes_[(size_t)i - 1])/((double)((s_+1)*(b - a + 1))/(s_));
@@ -1430,7 +1435,8 @@ std::pair<double, std::vector<std::pair<Topology,int>>> DPScheduler::synthesize_
 
   for (int a = 1; a <= s_; ++a) {
     int b = s_ + 1;
-    auto [G, cost] = (collective_=="all-to-all-nd")? completion_time_all_to_all(a,b-1) : completion_time(a, b - 1);
+    // auto [G, cost] = (collective_=="all-to-all-nd")? completion_time_all_to_all(a,b-1) : completion_time(a, b - 1);
+    auto [G, cost] = completion_time(a, b - 1);
     DP[(size_t)a][0] = cost;
     nxt[(size_t)a][0] = b;
     topo[(size_t)a][0] = std::move(G);
@@ -1445,7 +1451,8 @@ std::pair<double, std::vector<std::pair<Topology,int>>> DPScheduler::synthesize_
       Topology best_G;
 
       for (int b = a + 1; b <= s_ + 1; ++b) {
-        auto [G, v1] = (collective_=="all-to-all-nd")? completion_time_all_to_all(a,b-1) : completion_time(a, b - 1);
+        // auto [G, v1] = (collective_=="all-to-all-nd")? completion_time_all_to_all(a,b-1) : completion_time(a, b - 1);
+        auto [G, v1] = completion_time(a, b - 1);
         double v = v1 + DP[(size_t)b][(size_t)t - 1];
         if (v < best) {
           best = v;
