@@ -8,3 +8,8 @@ topologies/
 synthesize-schedule
 dump/
 synthesis_all2all.py
+plots/
+*.csv
+.spyproject/
+bkp*
+temp-*
