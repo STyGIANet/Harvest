@@ -52,7 +52,7 @@ df.boxplot(column="total_gpu_execution_time_us",
            grid=True)
 
 # Labels and title
-plt.xlabel("Number of GPUs")
+plt.xlabel("Number of GPUs (emulated)")
 plt.ylabel("Latency ("+r'$\mu$'+"s)")
 plt.suptitle("")  # remove auto title
 plt.title("")
