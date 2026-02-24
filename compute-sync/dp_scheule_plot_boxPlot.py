@@ -51,7 +51,7 @@ df.boxplot(column="timeMicro", by="n")
 plt.title("")
 
 # Labels and title
-plt.xlabel("Number of nodes")
+plt.xlabel("Number of GPUs (emulated)")
 plt.ylabel("Compute time ("+r'$\mu$'+"s)")
 plt.suptitle("")  # Removes the automatic "Boxplot grouped by n"
 
