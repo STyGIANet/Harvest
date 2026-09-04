@@ -1,0 +1,4 @@
+[submodule "astra-sim-dev"]
+	path = astra-sim-dev
+	url = https://github.com/STyGIANet/astra-sim-dev.git
+	branch = oic
