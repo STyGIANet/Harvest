@@ -25,37 +25,144 @@ import os
 df = pd.read_csv("numerical-results-rd-emu-params.csv", delimiter=" ", usecols=[0, 1, 2, 3, 4, 5, 6, 7, 9, 10], names=[
                  "alg", "n", "ports", "msgname", "bw", "alpha", "delta", "alphar", "cost", "numreconfig"])
 
-plotsdir='/home/vamsi/src/papers/harvest/sigcomm2026/plots/'
+plotsdir='/home/vamsi/src/papers/harvest/sigcomm2026-revision/plots/'
 os.makedirs(plotsdir, exist_ok=True)
 
 # %%
 
+# MESSAGE_SIZES = [
+#     16384,32768,65536,131072,
+#     262144,
+#     393216, 524288, 786432,
+#     1048576, 1572864, 2097152,
+#     3145728, 4194304,
+#     6291456, 8388608,
+#     12582912, 16777216,
+#     25165824, 33554432,
+#     50331648, 67108864,
+#     100663296, 134217728,
+#     201326592, 268435456,
+# ]
+
+# MESSAGE_NAMES = [
+#     "16KB",
+#     "32KB",
+#     "64KB",
+#     "128KB",
+#     "256KB",
+#     "384KB", "512KB", "768KB",
+#     "1MB", "1.5MB", "2MB",
+#     "3MB", "4MB",
+#     "6MB", "8MB",
+#     "12MB", "16MB",
+#     "24MB", "32MB",
+#     "48MB", "64MB",
+#     "96MB", "128MB",
+#     "192MB", "256MB",
+# ]
+
+# MESSAGE_SIZES = [
+#     16384,
+#     65536,
+#     262144,
+#     1048576,
+#     4194304,
+#     16777216,
+#     67108864,
+#     268435456,
+#     1073741824,
+#     4294967295,
+# ]
+
+# MESSAGE_NAMES = [
+#     "16KB",
+#     "64KB",
+#     "256KB",
+#     "1MB",
+#     "4MB",
+#     "16MB",
+#     "64MB",
+#     "256MB",
+#     "1GB",
+#     "4GB",
+# ]
+
+
 MESSAGE_SIZES = [
+    16384,
+    24576,
+    32768,
+    49152,
+    65536,
+    98304,
+    131072,
+    196608,
     262144,
-    393216, 524288, 786432,
-    1048576, 1572864, 2097152,
-    3145728, 4194304,
-    6291456, 8388608,
-    12582912, 16777216,
-    25165824, 33554432,
-    50331648, 67108864,
-    100663296, 134217728,
-    201326592, 268435456,
+    393216,
+    524288,
+    786432,
+    1048576,
+    1572864,
+    2097152,
+    3145728,
+    4194304,
+    6291456,
+    8388608,
+    12582912,
+    16777216,
+    25165824,
+    33554432,
+    50331648,
+    67108864,
+    100663296,
+    134217728,
+    201326592,
+    268435456,
+    402653184,
+    536870912,
+    805306368,
+    1073741824,
+    2147483648,
+    4294967295,
 ]
 
 MESSAGE_NAMES = [
+    "16KB",
+    "24KB",
+    "32KB",
+    "48KB",
+    "64KB",
+    "96KB",
+    "128KB",
+    "192KB",
     "256KB",
-    "384KB", "512KB", "768KB",
-    "1MB", "1.5MB", "2MB",
-    "3MB", "4MB",
-    "6MB", "8MB",
-    "12MB", "16MB",
-    "24MB", "32MB",
-    "48MB", "64MB",
-    "96MB", "128MB",
-    "192MB", "256MB",
+    "384KB",
+    "512KB",
+    "768KB",
+    "1MB",
+    "1.5MB",
+    "2MB",
+    "3MB",
+    "4MB",
+    "6MB",
+    "8MB",
+    "12MB",
+    "16MB",
+    "24MB",
+    "32MB",
+    "48MB",
+    "64MB",
+    "96MB",
+    "128MB",
+    "192MB",
+    "256MB",
+    "384MB",
+    "512MB",
+    "768MB",
+    "1GB",
+    "2GB",
+    "4GB",
 ]
-
 
 ALPHARS = [1000 , 10000 , 100000 , 1000000 , 100000000]
 ALPHAR_NAMES = [r'$1\mu$s',
@@ -72,6 +179,16 @@ cmap = mcolors.LinearSegmentedColormap.from_list(
         ]
     )
 
+def fmt_bytes(n):
+    n = float(n)
+    if n < 1024:
+        return f"{n:.0f} B"
+    if n < 1024**2:
+        return f"{n/1024:.0f} KB"
+    if n < 1024**3:
+        return f"{n/1024**2:.0f} MB"
+    return f"{n/1024**3:.0f} GB"
+
 #%%
 ALPHA = 30320
 DELTA = 1
@@ -82,7 +199,7 @@ NUM_PORTS = [1]
 NODES = [8]
 
 
-matplotlib.rcParams.update({'font.size': 40})
+matplotlib.rcParams.update({'font.size': 32})
 
 # RD
 
@@ -112,7 +229,7 @@ for PORTS in NUM_PORTS:
                 arr2[i][j] = min([BVNCOST+np.log2(int(N))*2*ALPHARS[j], STATICCOST])/dat[(dat["msgname"]==MESSAGE_NAMES[i])&(dat["alphar"]==ALPHARS[j])]["cost"]
                 print(arr1[i][j],ALPHARS[j])
         
-        fig, ax = plt.subplots(1,1,figsize=(12, 8))
+        fig, ax = plt.subplots(1,1,figsize=(10, 8))
         local_max = np.max(arr)
         vmax = local_max if local_max > 1 else 1.05
         norm = mcolors.Normalize(vmin=1, vmax=vmax)
@@ -120,8 +237,15 @@ for PORTS in NUM_PORTS:
         cbar = ax.collections[0].colorbar
         cbar.ax.yaxis.set_major_formatter(mticker.FormatStrFormatter('%.1f'))
         ax.set_xticklabels(ALPHAR_NAMES,rotation=45,ha='right')
-        ax.set_yticks(np.arange(len(MESSAGE_NAMES))[::4])
-        ax.set_yticklabels(MESSAGE_NAMES[::4],rotation=20)
+        # ax.set_yticks(np.arange(0, len(MESSAGE_NAMES),4))
+        # ax.set_yticklabels(MESSAGE_NAMES[::4],rotation=20)
+        yticks = np.arange(0, len(MESSAGE_SIZES),4)
+
+        if yticks[-1] != len(MESSAGE_SIZES) - 1:
+            yticks = np.append(yticks, len(MESSAGE_SIZES) - 1)
+        
+        ax.set_yticks([i+0.5 for i in yticks])
+        ax.set_yticklabels([fmt_bytes(MESSAGE_SIZES[i]) for i in yticks], rotation=25)
         # ax.set_title(f"N={N}, P={PORTS}")
         ax.set_xlabel("Reconfiguration delay")
         ax.set_ylabel("Message size")
@@ -130,7 +254,7 @@ for PORTS in NUM_PORTS:
         # ax.xaxis.grid(True,ls='--',c='lightgray')
         # ax.yaxis.grid(True,ls='--',c='lightgray')
         
-        fig1, ax1 = plt.subplots(1,1,figsize=(12, 8))
+        fig1, ax1 = plt.subplots(1,1,figsize=(10, 8))
         local_max = np.max(arr1)
         vmax = local_max if local_max > 1 else 1.05
         norm = mcolors.LogNorm(vmin=1, vmax=vmax)
@@ -138,9 +262,16 @@ for PORTS in NUM_PORTS:
         cbar = ax1.collections[0].colorbar
         cbar.ax.yaxis.set_major_formatter(mticker.FormatStrFormatter('%.0f'))
         ax1.set_xticklabels(ALPHAR_NAMES,rotation=45,ha='right')
-        ax1.set_yticks(np.arange(len(MESSAGE_NAMES))[::4])
-        ax1.set_yticklabels(MESSAGE_NAMES[::4],rotation=20)
+        # ax1.set_yticks(np.arange(0, len(MESSAGE_NAMES),4))
+        # ax1.set_yticklabels(MESSAGE_NAMES[::4],rotation=20)
         # ax1.set_title(f"N={N}, P={PORTS}")
+        yticks = np.arange(0, len(MESSAGE_SIZES),4)
+
+        if yticks[-1] != len(MESSAGE_SIZES) - 1:
+            yticks = np.append(yticks, len(MESSAGE_SIZES) - 1)
+        
+        ax1.set_yticks([i+0.5 for i in yticks])
+        ax1.set_yticklabels([fmt_bytes(MESSAGE_SIZES[i]) for i in yticks], rotation=25)
         ax1.set_xlabel("Reconfiguration delay")
         ax1.set_ylabel("Message size")
         fig1.tight_layout()
@@ -148,7 +279,7 @@ for PORTS in NUM_PORTS:
         # ax1.xaxis.grid(True,ls='--',c='lightgray')
         # ax1.yaxis.grid(True,ls='--',c='lightgray')
 
-        fig2, ax2 = plt.subplots(1,1,figsize=(12, 8))
+        fig2, ax2 = plt.subplots(1,1,figsize=(10, 8))
         local_max = np.max(arr2)
         vmax = local_max if local_max > 1 else 1.05
         norm = mcolors.Normalize(vmin=1, vmax=vmax)
@@ -156,8 +287,15 @@ for PORTS in NUM_PORTS:
         cbar = ax2.collections[0].colorbar
         cbar.ax.yaxis.set_major_formatter(mticker.FormatStrFormatter('%.1f'))
         ax2.set_xticklabels(ALPHAR_NAMES,rotation=45,ha='right')
-        ax2.set_yticks(np.arange(len(MESSAGE_NAMES))[::4])
-        ax2.set_yticklabels(MESSAGE_NAMES[::4],rotation=20)
+        # ax2.set_yticks(np.arange(0, len(MESSAGE_NAMES),4))
+        # ax2.set_yticklabels(MESSAGE_NAMES[::4],rotation=20)
+        yticks = np.arange(0, len(MESSAGE_SIZES),4)
+
+        if yticks[-1] != len(MESSAGE_SIZES) - 1:
+            yticks = np.append(yticks, len(MESSAGE_SIZES) - 1)
+        
+        ax2.set_yticks([i+0.5 for i in yticks])
+        ax2.set_yticklabels([fmt_bytes(MESSAGE_SIZES[i]) for i in yticks], rotation=25)
         # ax1.set_title(f"N={N}, P={PORTS}")
         ax2.set_xlabel("Reconfiguration delay")
         ax2.set_ylabel("Message size")
