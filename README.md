@@ -38,13 +38,6 @@ Clone the repository along with its submodules:
 git clone --recurse-submodules git@github.com:STyGIANet/Harvest.git
 cd Harvest
 ```
-
-Change the name of the directory:
-
-```bash
-mv astra-sim-dev astra-sim
-```
-
 Build the Docker image, then run the container with the current host directory mounted to Docker's internal /app directory.
 ```bash
 docker build --no-cache -t harvest:latest -f Dockerfile .
