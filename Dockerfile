@@ -78,14 +78,12 @@ ENV PATH="/opt/protobuf-${PROTOBUF_VER}/install/bin:$PATH"
 ENV protobuf_DIR="/opt/protobuf-${PROTOBUF_VER}/install"
 
 # Also, install Python protobuf package
-RUN pip3 install protobuf==5.${PROTOBUF_VER}
+RUN pip3 uninstall -y chakra protobuf
+RUN pip3 install --no-cache-dir protobuf==7.36.1
 
 # Set the environment variable
 ENV PROTOBUF_FROM_SOURCE=True
 ### ======================================================
-
-RUN pip3 uninstall -y chakra protobuf
-RUN pip3 install protobuf==7.36.1
 
 ARG GUROBI_VER=13.0.0
 
