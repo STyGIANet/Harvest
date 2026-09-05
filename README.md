@@ -7,10 +7,10 @@ The repository includes:
 * Harvest topology synthesizer
 * Harvest optical circuit switched network simulator built on top of ns3
 * A collective synthesizer
-* The astra-sim distributed machine learning system simulator
+* The ASTRA-sim distributed machine learning system simulator
 * Scripts for reproducing paper results
 
-## Requirments
+## Requirements
 
 #### Docker
 Before starting, please make sure to install [Docker](https://docs.docker.com/engine/install/ubuntu/) on your machine.
@@ -29,6 +29,7 @@ All required topology files are provided in:
 Harvest/astra-sim/acad/reconfigurable-topologies
 ```
 
+Therefore, even without access to a Gurobi license, you can still run the simulations using the provided topology files.
 ## Repository Setup
 
 Clone the repository along with its submodules:
@@ -49,4 +50,10 @@ Build the Docker image, then run the container with the current host directory m
 docker build --no-cache -t harvest:latest -f Dockerfile .
 docker run -it -v $(pwd):/app harvest:latest bash
 ```
----
+Once you have started the Docker container, you can navigate to the individual folders to run the experiments described in our paper:
+
+* `astra-sim` folder (main): Network simulation experiments corresponding to Figures 5 and 9(b).
+* `synthesis`folder: Topology synthesis and numerical evaluation, including replication of Figure 8.
+* `hardware-emulation` folder: Hardware experiment replication on an 8-GPU testbed, covering *Figures 6, 7, and 9(a).
+* `compute-sync` folder: Synchronization experiments corresponding to Figures 10 and 11.
+
