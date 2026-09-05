@@ -7,6 +7,8 @@ if [[ ! -d $DUMP_DIR ]];then
 	mkdir -p $DUMP_DIR
 fi
 
+N_CORES=$(nproc)
+
 # Few examples:
 # python3 generate-collective.py 4x4 67108864 4 reduce-scatter-rd-nd out.json
 # python3 generate-collective.py 27 81 bruckallgather-r3-p3 out.json
@@ -50,7 +52,11 @@ for N in ${NODES[@]};do
 				MESSAGE_SIZE=${MESSAGE_SIZES[$IDX]}
 				MESSAGE_NAME=${MESSAGE_NAMES[$IDX]}
 				OUTFILE=$DUMP_DIR/collective-$ALG-$N-$P-$MESSAGE_NAME.json
-				python3 generate-collective.py $N $MESSAGE_SIZE $P $ALG $OUTFILE
+				python3 generate-collective.py $N $MESSAGE_SIZE $P $ALG $OUTFILE &
+				while [[ $(ps aux | grep 'python3 generate-collective' | wc -l) -ge $N_CORES ]]; do
+					echo "Waiting for cpu cores...!"
+					sleep 2
+				done
 			done
 		done
 	done
@@ -60,7 +66,7 @@ NODES=(4 8 16 32 64 128 256)
 PORTS=(1 2)
 ALGS=(all-gather-rd-nd all-gather-swing-nd)
 
-echo "Generating 1D AllReduce"
+echo "Generating 1D AllGather"
 
 for N in ${NODES[@]};do
 	for P in ${PORTS[@]};do
@@ -69,7 +75,11 @@ for N in ${NODES[@]};do
 				MESSAGE_SIZE=${MESSAGE_SIZES[$IDX]}
 				MESSAGE_NAME=${MESSAGE_NAMES[$IDX]}
 				OUTFILE=$DUMP_DIR/collective-$ALG-$N-$P-$MESSAGE_NAME.json
-				python3 generate-collective.py $N $MESSAGE_SIZE $P $ALG $OUTFILE
+				python3 generate-collective.py $N $MESSAGE_SIZE $P $ALG $OUTFILE &
+				while [[ $(ps aux | grep 'python3 generate-collective' | wc -l) -ge $N_CORES ]]; do
+					echo "Waiting for cpu cores...!"
+					sleep 2
+				done
 			done
 		done
 	done
@@ -79,7 +89,7 @@ NODES=(4 8 16 32 64 128 256)
 PORTS=(1 2)
 ALGS=(reduce-scatter-rd-nd reduce-scatter-swing-nd)
 
-echo "Generating 1D AllReduce"
+echo "Generating 1D ReduceScatter"
 
 for N in ${NODES[@]};do
 	for P in ${PORTS[@]};do
@@ -88,7 +98,11 @@ for N in ${NODES[@]};do
 				MESSAGE_SIZE=${MESSAGE_SIZES[$IDX]}
 				MESSAGE_NAME=${MESSAGE_NAMES[$IDX]}
 				OUTFILE=$DUMP_DIR/collective-$ALG-$N-$P-$MESSAGE_NAME.json
-				python3 generate-collective.py $N $MESSAGE_SIZE $P $ALG $OUTFILE
+				python3 generate-collective.py $N $MESSAGE_SIZE $P $ALG $OUTFILE &
+				while [[ $(ps aux | grep 'python3 generate-collective' | wc -l) -ge $N_CORES ]]; do
+					echo "Waiting for cpu cores...!"
+					sleep 2
+				done
 			done
 		done
 	done
@@ -109,7 +123,11 @@ for N in ${NODES[@]};do
 				MESSAGE_SIZE=${MESSAGE_SIZES[$IDX]}
 				MESSAGE_NAME=${MESSAGE_NAMES[$IDX]}
 				OUTFILE=$DUMP_DIR/collective-$ALG-$N-$P-$MESSAGE_NAME.json
-				python3 generate-collective.py $N $MESSAGE_SIZE $ALG $OUTFILE
+				python3 generate-collective.py $N $MESSAGE_SIZE $ALG $OUTFILE &
+				while [[ $(ps aux | grep 'python3 generate-collective' | wc -l) -ge $N_CORES ]]; do
+					echo "Waiting for cpu cores...!"
+					sleep 2
+				done
 			done
 		done
 	done
@@ -129,7 +147,11 @@ for N in ${NODES[@]};do
 				MESSAGE_SIZE=${MESSAGE_SIZES[$IDX]}
 				MESSAGE_NAME=${MESSAGE_NAMES[$IDX]}
 				OUTFILE=$DUMP_DIR/collective-$ALG-$N-$P-$MESSAGE_NAME.json
-				python3 generate-collective.py $N $MESSAGE_SIZE $P $ALG $OUTFILE
+				python3 generate-collective.py $N $MESSAGE_SIZE $P $ALG $OUTFILE &
+				while [[ $(ps aux | grep 'python3 generate-collective' | wc -l) -ge $N_CORES ]]; do
+					echo "Waiting for cpu cores...!"
+					sleep 2
+				done
 			done
 		done
 	done
@@ -149,7 +171,11 @@ for N in ${NODES[@]};do
 				MESSAGE_SIZE=${MESSAGE_SIZES[$IDX]}
 				MESSAGE_NAME=${MESSAGE_NAMES[$IDX]}
 				OUTFILE=$DUMP_DIR/collective-$ALG-$N-$P-$MESSAGE_NAME.json
-				python3 generate-collective.py $N $MESSAGE_SIZE $ALG-p$P $OUTFILE
+				python3 generate-collective.py $N $MESSAGE_SIZE $ALG-p$P $OUTFILE &
+				while [[ $(ps aux | grep 'python3 generate-collective' | wc -l) -ge $N_CORES ]]; do
+					echo "Waiting for cpu cores...!"
+					sleep 2
+				done
 			done
 		done
 	done
@@ -167,7 +193,11 @@ for N in ${NODES[@]};do
 				MESSAGE_SIZE=${MESSAGE_SIZES[$IDX]}
 				MESSAGE_NAME=${MESSAGE_NAMES[$IDX]}
 				OUTFILE=$DUMP_DIR/collective-$ALG-$N-$P-$MESSAGE_NAME.json
-				python3 generate-collective.py $N $MESSAGE_SIZE $ALG-p$P $OUTFILE
+				python3 generate-collective.py $N $MESSAGE_SIZE $ALG-p$P $OUTFILE &
+				while [[ $(ps aux | grep 'python3 generate-collective' | wc -l) -ge $N_CORES ]]; do
+					echo "Waiting for cpu cores...!"
+					sleep 2
+				done
 			done
 		done
 	done
@@ -188,7 +218,11 @@ for N in ${DIMS[@]};do
 				MESSAGE_SIZE=${MESSAGE_SIZES[$IDX]}
 				MESSAGE_NAME=${MESSAGE_NAMES[$IDX]}
 				OUTFILE=$DUMP_DIR/collective-$ALG-$N-$P-$MESSAGE_NAME.json
-				python3 generate-collective.py $N $MESSAGE_SIZE $P $ALG $OUTFILE
+				python3 generate-collective.py $N $MESSAGE_SIZE $P $ALG $OUTFILE &
+				while [[ $(ps aux | grep 'python3 generate-collective' | wc -l) -ge $N_CORES ]]; do
+					echo "Waiting for cpu cores...!"
+					sleep 2
+				done
 			done
 		done
 	done
@@ -209,7 +243,11 @@ for N in ${DIMS[@]};do
 				MESSAGE_SIZE=${MESSAGE_SIZES[$IDX]}
 				MESSAGE_NAME=${MESSAGE_NAMES[$IDX]}
 				OUTFILE=$DUMP_DIR/collective-$ALG-$N-$P-$MESSAGE_NAME.json
-				python3 generate-collective.py $N $MESSAGE_SIZE $P $ALG $OUTFILE
+				python3 generate-collective.py $N $MESSAGE_SIZE $P $ALG $OUTFILE &
+				while [[ $(ps aux | grep 'python3 generate-collective' | wc -l) -ge $N_CORES ]]; do
+					echo "Waiting for cpu cores...!"
+					sleep 2
+				done
 			done
 		done
 	done
@@ -230,7 +268,11 @@ for N in ${NODES[@]};do
 				MESSAGE_SIZE=${MESSAGE_SIZES[$IDX]}
 				MESSAGE_NAME=${MESSAGE_NAMES[$IDX]}
 				OUTFILE=$DUMP_DIR/collective-$ALG-$N-$P-$MESSAGE_NAME.json
-				python3 generate-collective.py $N $MESSAGE_SIZE $ALG $OUTFILE
+				python3 generate-collective.py $N $MESSAGE_SIZE $ALG $OUTFILE &
+				while [[ $(ps aux | grep 'python3 generate-collective' | wc -l) -ge $N_CORES ]]; do
+					echo "Waiting for cpu cores...!"
+					sleep 2
+				done
 			done
 		done
 	done
