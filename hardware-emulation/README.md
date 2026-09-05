@@ -69,10 +69,10 @@ python3 plot.py
 | Figure 6(b) | `emu-static.pdf` | Static ring divided by Harvest |
 | Figure 6(c) | `emu-best.pdf` | Best of BvN and static divided by Harvest |
 | Figure 7 | `alpha-beta.pdf` | Measured one-hop time and the fitted $\alpha$--$\beta$ model |
-| Figure 9(a) | `emu-bestringrd.pdf` | Best static Ring/RD baseline divided by RD with Harvest |
-| Figure 12(a) | `emu-ring.pdf` | Ring divided by RD with Harvest |
-| Figure 12(b) | `emu-revring.pdf` | RD with Harvest divided by Ring |
-| Figure 12(c) | `emu-bestringrd.pdf` | Best static Ring/RD baseline divided by RD with Harvest |
+| Figure 9(a) | `emu-bestringrd.pdf` | Best among Ring and RD divided by Harvest with RD |
+| Figure 12(a) | `emu-ring.pdf` | Static Ring with RD divided by Harvest with RD |
+| Figure 12(b) | `emu-revring.pdf` | Harvest with RD divided by static ring with ring algorithm |
+| Figure 12(c) | `emu-bestringrd.pdf` | Best among static Ring with Ring/RD divided by Harvest with RD |
 
 `plot.py` also generates `bandwidth-measurement.pdf`, which reports effective bandwidth but is not included in the paper. Figure 6(d), comes from the numerical synthesis workflow in `synthesis/plots-rd-emu-params.py`, not from this directory.
 
